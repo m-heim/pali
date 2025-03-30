@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pali"
+version = "v0.0.1"
+dependencies = [
+]
+requires-python = ">=3.8"
+authors = [
+  {name = "Maximilian Heim"},
+]
+
+[project.scripts]
+spam-cli = "pali:pali"
