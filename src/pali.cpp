@@ -13,11 +13,12 @@ void Image::print() {
     for (int i = 0; i < this->height; i++) {
         //s += std::to_string(i);
         for (int j = 0; j < this->width; j++) {
-            std::string v = (this->pixels + (i * height) + j)->getValue();
+            auto p = (this->pixels + (i * height) + j);
+            //std::string v = p->getValue();
             //if (v == "   ") {
             //    std::cout << "found value\n";
             //}
-            s += (this->pixels + (i * width) + j)->getValue();
+            s += p->getValue();
         }
         s += "\n";
     }
@@ -32,8 +33,14 @@ void Image::setPixel(Point p, PixelProperties pp) {
 void Engine::loop() {
     auto s = std::chrono::high_resolution_clock::now();
     this->image.clear();
+    auto f = std::chrono::high_resolution_clock::now();
+    std::cout << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(f - s).count()) << std::endl;
     this->updateObjects();
+    f = std::chrono::high_resolution_clock::now();
+    std::cout << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(f - s).count()) << std::endl;
     this->loadObjects();
+    f = std::chrono::high_resolution_clock::now();
+    std::cout << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(f - s).count()) << std::endl;
     std::string v = "";
     for (int i = 0; i < 43; i++) {
         v += '\n';
@@ -41,11 +48,11 @@ void Engine::loop() {
     std::cout << v;
     this->image.print();
     std::cout << "Objects " + std::to_string(this->objects.size()) + "\n";
-    auto f = std::chrono::high_resolution_clock::now();
+    f = std::chrono::high_resolution_clock::now();
     std::cout << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(f - s).count()) << std::endl;
     usleep(10000);
 }
 
-void Engine::addObject(EngineObject *eo) {
+void Engine::addObject(std::shared_ptr<EngineObject> eo) {
     this->objects.push_back(eo);
 }

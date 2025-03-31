@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <memory>
 
 class Point {
     public:
@@ -40,8 +41,6 @@ class PixelProperties {
         std::string getValue();
 };
 
-const PixelProperties PIXEL_EMPTY = PixelProperties(" ", RGB(0, 0, 0));
-
 class Image {
     public:
         Image(){}
@@ -51,9 +50,11 @@ class Image {
             int i = sizeof(PixelProperties) * height * width;
             std::cout << "Allocating " + std::to_string(i) + "\n";
             this->pixels = (PixelProperties *) malloc(i);
+            this->PIXEL_EMPTY = PixelProperties(" ", RGB(0, 0, 0));
         }
         int height;
         int width;
+        PixelProperties PIXEL_EMPTY;
         PixelProperties *pixels;
         PixelProperties *e;
         void print();
@@ -61,7 +62,7 @@ class Image {
         void clear() {
             for (int i = 0; i < this->height; i++) {
                 for (int j = 0; j < this->width; j++) {
-                    this->setPixel(Point(j, i), PIXEL_EMPTY);
+                    this->setPixel(Point(j, i), this->PIXEL_EMPTY);
                 }
             }
         }
@@ -117,15 +118,15 @@ class Engine {
             this->image = Image(height, width);
         }
         Image image;
-        std::vector<EngineObject *> objects;
-        void addObject(EngineObject *eo);
+        std::vector<std::shared_ptr<EngineObject>> objects;
+        void addObject(std::shared_ptr<EngineObject> eo);
         void updateObjects() {
             std::cout << "Updating objects\n";
-            for (auto *eo : this->objects) {
+            for (auto eo : this->objects) {
                 eo->p.x += eo->v.x;
                 eo->p.y += eo->v.y;
             }
-            for (std::vector<EngineObject *>::iterator i = this->objects.end() - 1; i >= this->objects.begin();) {
+            for (std::vector<std::shared_ptr<EngineObject>>::iterator i = this->objects.end() - 1; i >= this->objects.begin();) {
                 std::cout << "Object" << "\n";
                 float x = (*i)->p.x;
                 float y = (*i)->p.y;
@@ -138,7 +139,7 @@ class Engine {
         }
         void loadObjects() {
             std::cout << "Loading objects\n";
-            for (auto *eo : this->objects) {
+            for (auto eo : this->objects) {
                 for (Pixel &p : eo->getPixels()) {
                     this->image.setPixel(p.p, p.pp);
                 }
