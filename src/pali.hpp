@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <memory>
+#include <cmath>
 
 class Point {
     public:
@@ -89,7 +90,7 @@ class EngineObject {
         }
         ~EngineObject(){}
         Point p;
-        Point v;
+        Point v = Point(0,0);
         void setVelocity(Point v) {
             //std::cout << "Setting velocity of " + std::to_string(this->p.x) + " " + std::to_string(this->p.y) + " " + "\n";
             this->v = v;
@@ -105,10 +106,61 @@ class PixelObject: public EngineObject {
             this->pp = pp;
         }
         ~PixelObject(){}
-        PixelProperties pp;
         std::vector<Pixel> getPixels() override {
             return std::vector<Pixel> { Pixel(this->p, this->pp) };
         }
+    private:
+        PixelProperties pp;
+};
+
+class SphereObject: public EngineObject {
+    public:
+    SphereObject(){}
+    SphereObject(Point p, PixelProperties pp, float radius) {
+        this->p = p;
+        this->radius = radius;
+        this->pp = pp;
+    }
+    private:
+    PixelProperties pp;
+    float radius;
+    std::vector<Pixel> getPixels() override {
+        std::vector<Pixel> v;
+        int eru = powf(this->radius, 2);
+        for (int i = -radius; i <= this->radius; i++) {
+            for (int j = -radius; j <= this->radius; j++) {
+                int p = powf(i, 2) + powf(j, 2);
+                if (p <= eru) {
+                    v.push_back(Pixel(Point(this->p.x + i, this->p.y + j), this->pp));
+                }
+            }
+        }
+        return v;
+    }
+};
+
+class RectangleObject: public EngineObject {
+    public:
+    RectangleObject(){}
+    RectangleObject(Point p, PixelProperties pp, int height, int width) {
+        this->pp = pp;
+        this->p = p;
+        this->height = height;
+        this->width = width;
+    }
+    std::vector<Pixel> getPixels() override {
+        std::vector<Pixel> v;
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                v.push_back(Pixel(Point(this->p.x + i, this->p.y + j), this->pp));
+            }
+        }
+        return v;
+    }
+    private:
+    int height;
+    int width;
+    PixelProperties pp;
 };
 
 class Engine {
@@ -127,10 +179,10 @@ class Engine {
                 eo->p.y += eo->v.y;
             }
             for (std::vector<std::shared_ptr<EngineObject>>::iterator i = this->objects.end() - 1; i >= this->objects.begin();) {
-                std::cout << "Object" << "\n";
+                //std::cout << "Object" << "\n";
                 float x = (*i)->p.x;
                 float y = (*i)->p.y;
-                std::cout << "Position " + std::to_string(x) + " " + std::to_string(y) + "\n";
+                //std::cout << "Position " + std::to_string(x) + " " + std::to_string(y) + "\n";
                 if (x < 0 || y < 0 || x >= this->image.width || y >= this->image.height) {
                     this->objects.erase(i);
                 }
@@ -141,6 +193,9 @@ class Engine {
             std::cout << "Loading objects\n";
             for (auto eo : this->objects) {
                 for (Pixel &p : eo->getPixels()) {
+                    if (p.p.x < 0 || p.p.x > this->image.width || p.p.y < 0 || p.p.y >= this->image.height) {
+                        continue;
+                    }
                     this->image.setPixel(p.p, p.pp);
                 }
             }

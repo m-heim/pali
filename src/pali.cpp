@@ -10,15 +10,14 @@ std::string PixelProperties::getValue() {
 
 void Image::print() {
     std::string s = "";
-    for (int i = 0; i < this->height; i++) {
+    for (int i = this->height - 1; i >= 0; i--) {
         //s += std::to_string(i);
         for (int j = 0; j < this->width; j++) {
-            auto p = (this->pixels + (i * height) + j);
-            //std::string v = p->getValue();
+            //std::string v = (this->pixels + (i * height) + j)->getValue();
             //if (v == "   ") {
             //    std::cout << "found value\n";
             //}
-            s += p->getValue();
+            s += (this->pixels + (i * width) + j)->getValue();
         }
         s += "\n";
     }
@@ -41,16 +40,17 @@ void Engine::loop() {
     this->loadObjects();
     f = std::chrono::high_resolution_clock::now();
     std::cout << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(f - s).count()) << std::endl;
-    std::string v = "";
-    for (int i = 0; i < 43; i++) {
-        v += '\n';
-    }
-    std::cout << v;
+    //std::string v = "";
+    //for (int i = 0; i < 43; i++) {
+    //    v += '\n';
+    //}
+    //std::cout << v;
     this->image.print();
     std::cout << "Objects " + std::to_string(this->objects.size()) + "\n";
     f = std::chrono::high_resolution_clock::now();
     std::cout << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(f - s).count()) << std::endl;
     usleep(10000);
+    std::cout.flush();
 }
 
 void Engine::addObject(std::shared_ptr<EngineObject> eo) {
