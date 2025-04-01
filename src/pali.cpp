@@ -10,6 +10,7 @@ std::string PixelProperties::getValue() {
 
 void Image::print() {
     std::string s = "";
+    s.reserve(this->height * this->width * 4);
     for (int i = this->height - 1; i >= 0; i--) {
         //s += std::to_string(i);
         for (int j = 0; j < this->width; j++) {
@@ -17,16 +18,11 @@ void Image::print() {
             //if (v == "   ") {
             //    std::cout << "found value\n";
             //}
-            s += (this->pixels + (i * width) + j)->getValue();
+            s += this->pixels[(i * width) + j].getValue();
         }
         s += "\n";
     }
     std::cout << s;
-}
-
-void Image::setPixel(Point p, PixelProperties pp) {
-    //std::cout << "Setting pixel " + std::to_string(p.x) + " " + std::to_string(p.y) + " value " + pp.value + "\n";
-    *(this->pixels + (this->width * (int)p.y) + (int)p.x) = pp;
 }
 
 void Engine::loop() {
@@ -48,9 +44,12 @@ void Engine::loop() {
     this->image.print();
     std::cout << "Objects " + std::to_string(this->objects.size()) + "\n";
     f = std::chrono::high_resolution_clock::now();
-    std::cout << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(f - s).count()) << std::endl;
-    usleep(10000);
     std::cout.flush();
+    uint64_t i = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    this->u = i - this->p;
+    this->p = i;
+    std::cout << std::to_string(this->u) << std::endl;
+    //usleep(10000);
 }
 
 void Engine::addObject(std::shared_ptr<EngineObject> eo) {

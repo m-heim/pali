@@ -14,21 +14,25 @@ int main() {
     PixelProperties pp = PixelProperties(value, RGB(74, 74, 74));
     std::random_device rd;  // a seed source for the random number engine
     std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
-    std::uniform_int_distribution<> distrib(-10, 10);
+    std::uniform_int_distribution<> distrib(-100, 100);
     
-    int x = distrib(gen);
-    if (x == 0) {
-        x = 1;
-    }
-    int r = distrib(gen);
-    r += 30;
-    r /= 10;
+    float x = distrib(gen);
+    x += 200;
+    x /= 1000;
+
+    float r = distrib(gen);
+    r += 340;
+    r /= 84;
+
     int y = distrib(gen);
-    if (y == 0) {
-        y = 1;
-    }
-    auto po = std::make_unique<SphereObject>(SphereObject(Point(42, 42), pp, r));
-    po->setVelocity(Point(x / 24.0,y / 24.0));
+    y += 100;
+    y /= 300;
+
+    int v = distrib(gen);
+    v += 100;
+    v *= 3;
+    auto po = std::make_unique<SnowObject>(SnowObject(Point(v, 84), pp, r, x, y));
+    //po->setVelocity(Point(x / 24.0,y / 24.0));
 
     engine.addObject(std::move(po));
         std::cout << "Looping\n";
