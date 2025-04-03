@@ -73,21 +73,32 @@ int main() {
             char v = queue.front();
             queue.pop();
             if (v == 'w') {
-                if 
-                dir = 0;
+                if (dir != 2) {
+                    dir = 0;
+                }
             } else if (v == 'd') {
-                dir = 1;
+                if (dir != 3) {
+                    dir = 1;
+                }
             } else if (v == 's') {
-                dir = 2;
+                if (dir != 0) {
+                    dir = 2;
+                }
             } else if (v == 'a') {
-                dir = 3;
+                if (dir != 1) {
+                    dir = 3;
+                }
             }
         }
             auto po = std::make_shared<PixelObject>(PixelObject(Point(x, y), pp));
             engine.addObject(po);
             v.push(po);
-            engine.removeObject(v.front());
-            v.pop();
+            if (!v.empty() && v.front().get()) {
+                engine.removeObject(v.front());
+            }
+            if (!v.empty()) {
+                v.pop();
+            }
         if (dir == 0) {
             y += 1;
         }

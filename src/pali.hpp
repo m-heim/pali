@@ -258,7 +258,7 @@ class Engine {
             if (this->verbose) {
                 std::cout << "Updating objects\n";
             }
-            for (std::vector<std::shared_ptr<EngineObject>>::iterator i = this->objects.end() - 1; i >= this->objects.begin();) {
+            for (auto i = this->objects.end() - 1; i >= this->objects.begin();) {
                 if (*i == nullptr) {
                     this->objects.erase(i);
                 } else {
