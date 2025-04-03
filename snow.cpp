@@ -6,10 +6,21 @@
 #include <random>
 
 
-int main() {
-    Engine engine(84, 84);
+int main(int argc, char **argv) {
+    bool verbose = false;
+    if (argc > 1) {
+        for (int i = 1; i < argc; i++) {
+            std::string s = std::string(argv[i]);
+            if (s =="--verbose") {
+                verbose = true;
+            }
+        }
+    }
+    Engine engine(84, 84, verbose);
     std::string value = "o";
     int i = 0;
+    auto s = std::make_unique<StringObject>(StringObject(Point(40, 20), "Hello world"));
+    engine.addObject(std::move(s));
     while (i < 1000) {
     PixelProperties pp = PixelProperties(value, RGB(74, 74, 74));
     std::random_device rd;  // a seed source for the random number engine

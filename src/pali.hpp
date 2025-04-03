@@ -208,38 +208,80 @@ class SnowObject: public EngineObject {
     }
 };
 
+class StringObject: public EngineObject {
+    public:
+    StringObject(){}
+    StringObject(Point p, std::string s) {
+        this->p = p;
+        this->s = s;
+        this->v = Point(0, 0);
+    }
+    private:
+    std::string s;
+    std::vector<Pixel> getPixels() override {
+        std::vector<Pixel> vals;
+        int i = 0;
+        for (char v : this->s) {
+            vals.push_back(Pixel(Point(this->p.x + i, this->p.y), PixelProperties(std::string(1, v), RGB(84, 84, 84))));
+            i += 1;
+        }
+        return vals;
+    }
+    void updateVelocity() override {}
+
+};
+
 class Engine {
     public:
         Engine(){}
-        Engine(int height, int width) {
+        Engine(int height, int width, bool verbose) {
+            this->verbose = verbose;
             this->image = Image(height, width);
         }
         Image image;
+        bool verbose;
         int u;
         uint64_t p = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 
         std::vector<std::shared_ptr<EngineObject>> objects;
         void addObject(std::shared_ptr<EngineObject> eo);
+        void removeObject(std::shared_ptr<EngineObject> o) {
+            for (auto it = this->objects.begin(); it != this->objects.end(); it++) {
+                if (&*it == &o) {
+                    this->objects.erase(it);
+                    return;
+                }
+            }
+            throw std::runtime_error("Error");
+        }
         void updateObjects() {
-            std::cout << "Updating objects\n";
+            if (this->verbose) {
+                std::cout << "Updating objects\n";
+            }
+            for (std::vector<std::shared_ptr<EngineObject>>::iterator i = this->objects.end() - 1; i >= this->objects.begin();) {
+                if (*i == nullptr) {
+                    this->objects.erase(i);
+                } else {
+                    //std::cout << "Object" << "\n";
+                    float x = (*i)->p.x;
+                    float y = (*i)->p.y;
+                    //std::cout << "Position " + std::to_string(x) + " " + std::to_string(y) + "\n";
+                    if (x < 0 || y < 0 || x >= this->image.width || y >= this->image.height) {
+                        this->objects.erase(i);
+                    }
+                }
+                i--;
+            }
             for (auto eo : this->objects) {
                 eo->updateVelocity();
                 eo->p.x += eo->v.x;
                 eo->p.y += eo->v.y;
             }
-            for (std::vector<std::shared_ptr<EngineObject>>::iterator i = this->objects.end() - 1; i >= this->objects.begin();) {
-                //std::cout << "Object" << "\n";
-                float x = (*i)->p.x;
-                float y = (*i)->p.y;
-                //std::cout << "Position " + std::to_string(x) + " " + std::to_string(y) + "\n";
-                if (x < 0 || y < 0 || x >= this->image.width || y >= this->image.height) {
-                    this->objects.erase(i);
-                }
-                i--;
-            }
         }
         void loadObjects() {
-            std::cout << "Loading objects\n";
+            if (this->verbose) {
+                std::cout << "Loading objects\n";
+            }
             for (auto eo : this->objects) {
                 for (Pixel &p : eo->getPixels()) {
                     if (p.p.x < 0 || p.p.x > this->image.width || p.p.y < 0 || p.p.y >= this->image.height) {

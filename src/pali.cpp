@@ -29,29 +29,42 @@ void Engine::loop() {
     auto s = std::chrono::high_resolution_clock::now();
     this->image.clear();
     auto f = std::chrono::high_resolution_clock::now();
-    std::cout << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(f - s).count()) << std::endl;
+    if (this->verbose) {
+        std::cout << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(f - s).count()) << std::endl;
+    }
     this->updateObjects();
     f = std::chrono::high_resolution_clock::now();
-    std::cout << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(f - s).count()) << std::endl;
+    if (this->verbose) {
+        std::cout << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(f - s).count()) << std::endl;
+    }
     this->loadObjects();
     f = std::chrono::high_resolution_clock::now();
-    std::cout << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(f - s).count()) << std::endl;
+    if (this->verbose) {
+        std::cout << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(f - s).count()) << std::endl;
+    }
     //std::string v = "";
     //for (int i = 0; i < 43; i++) {
     //    v += '\n';
     //}
     //std::cout << v;
     this->image.print();
-    std::cout << "Objects " + std::to_string(this->objects.size()) + "\n";
+    if (this->verbose) {
+        std::cout << "Objects " + std::to_string(this->objects.size()) + "\n";
+    }
     f = std::chrono::high_resolution_clock::now();
     std::cout.flush();
     uint64_t i = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
     this->u = i - this->p;
     this->p = i;
-    std::cout << std::to_string(this->u) << std::endl;
-    //usleep(10000);
+    if (this->verbose) {
+        std::cout << std::to_string(this->u) << std::endl;
+    }
+    usleep(10000);
 }
 
 void Engine::addObject(std::shared_ptr<EngineObject> eo) {
+    if (this->verbose) {
+        std::cout << "Object" << std::endl;
+    }
     this->objects.push_back(eo);
 }
