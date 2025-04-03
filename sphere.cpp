@@ -7,7 +7,7 @@
 
 
 int main() {
-    Engine engine(84, 84);
+    Engine engine(84, 84, false);
     std::string value = "o";
     int i = 0;
     while (i < 1000) {

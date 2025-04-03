@@ -48,7 +48,7 @@ void i(std::queue<char> *q) {
 
 int main() {
     std::queue<char> queue;
-    Engine engine(42, 42, true);
+    Engine engine(42, 42, false);
     std::queue<PixelObject> q;
     std::string value = "A";
     PixelProperties pp = PixelProperties(value, RGB(74, 74, 74));
@@ -72,20 +72,22 @@ int main() {
         if (!queue.empty()) {
             char v = queue.front();
             queue.pop();
-            if (v == 'd') {
+            if (v == 'w') {
+                if 
+                dir = 0;
+            } else if (v == 'd') {
+                dir = 1;
+            } else if (v == 's') {
                 dir = 2;
+            } else if (v == 'a') {
+                dir = 3;
             }
         }
-        //if (i == 100) {
             auto po = std::make_shared<PixelObject>(PixelObject(Point(x, y), pp));
-            //po->setVelocity(Point(0, 1));
-        //delete &o;
-        
             engine.addObject(po);
             v.push(po);
             engine.removeObject(v.front());
             v.pop();
-        //}
         if (dir == 0) {
             y += 1;
         }
@@ -94,6 +96,9 @@ int main() {
         }
         if (dir == 2) {
             y -= 1;
+        }
+        if (dir == 3) {
+            x -= 1;
         }
         i += 1;
         usleep(100000);

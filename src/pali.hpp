@@ -247,7 +247,7 @@ class Engine {
         void addObject(std::shared_ptr<EngineObject> eo);
         void removeObject(std::shared_ptr<EngineObject> o) {
             for (auto it = this->objects.begin(); it != this->objects.end(); it++) {
-                if (&*it == &o) {
+                if ((*it).get() == o.get()) {
                     this->objects.erase(it);
                     return;
                 }
