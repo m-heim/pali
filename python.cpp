@@ -52,22 +52,28 @@ int main() {
     std::queue<PixelObject> q;
     std::string value = "A";
     PixelProperties pp = PixelProperties(value, RGB(74, 74, 74));
+    std::random_device rd;  // a seed source for the random number engine
+    std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
+    std::uniform_int_distribution<> distrib(0, 42);
     int x = 10;
     int y = 10;
     int dir = 0;
     std::thread j(i, &queue);
-
-    std::queue<std::shared_ptr<PixelObject>> v;
+    std::size_t s = 0;
+    std::queue<uint64_t> v;
     for (int i = 0; i < 10; i++) {
-        auto po = std::make_shared<PixelObject>(PixelObject(Point(x, y), pp));
+        auto po = std::make_unique<PixelObject>(PixelObject(Point(x, y), pp));
         //po->setVelocity(Point(0, 1));
-        engine.addObject(po);
-        v.push(po);
+        uint64_t vi = engine.addObject(std::move(po));
+        v.push(vi);
         y += 1;
+        s += 1;
     }
     int i = 0;
     while (1) {
         std::cout << "Looping\n";
+        std::cout << "Queue" << std::to_string(v.size()) << std::endl;
+        std::cout << std::to_string(x) << " " << std::to_string(y) << std::endl;
         engine.loop();
         if (!queue.empty()) {
             char v = queue.front();
@@ -90,15 +96,25 @@ int main() {
                 }
             }
         }
-            auto po = std::make_shared<PixelObject>(PixelObject(Point(x, y), pp));
-            engine.addObject(po);
-            v.push(po);
-            if (!v.empty() && v.front().get()) {
-                engine.removeObject(v.front());
-            }
-            if (!v.empty()) {
-                v.pop();
-            }
+        if (!v.empty()) {
+            uint64_t vi = v.front();
+            v.pop();
+            engine.removeObject(vi);
+        }
+        if (x > 0 && x < 42 && y > 0 && y < 42) {
+            auto po = std::make_unique<PixelObject>(PixelObject(Point(x, y), pp));
+            uint64_t vi = engine.addObject(std::move(po));
+            v.push(vi);
+        }
+        if (i == 100) {
+            int vx = distrib(gen);
+            int vy = distrib(gen);
+            auto ppv = pp;
+            ppv.setValue("B");
+            auto po = std::make_unique<PixelObject>(PixelObject(Point(vx, vy), ppv));
+            engine.addObject(std::move(po));
+            i = 0;
+        }
         if (dir == 0) {
             y += 1;
         }

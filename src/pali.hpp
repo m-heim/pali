@@ -41,6 +41,9 @@ class PixelProperties {
         std::string value;
         RGB color;
         std::string getValue();
+        void setValue(std::string value) {
+            this->value = value;
+        }
 };
 
 class Pixel {
@@ -94,7 +97,18 @@ class EngineObject {
             this->v = v;
         }
         ~EngineObject(){}
+        bool getExists() {
+            return this->exists;
+        }
+        void setExists(bool exists) {
+            this->exists = exists;
+        }
+        bool exists = true;
         Point p;
+        uint64_t id;
+        uint64_t getId() {
+            return this->id;
+        }
         Point v = Point(0,0);
         void setVelocity(Point v) {
             //std::cout << "Setting velocity of " + std::to_string(this->p.x) + " " + std::to_string(this->p.y) + " " + "\n";
@@ -241,38 +255,35 @@ class Engine {
         Image image;
         bool verbose;
         int u;
+        uint64_t id = 0;
         uint64_t p = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 
-        std::vector<std::shared_ptr<EngineObject>> objects;
-        void addObject(std::shared_ptr<EngineObject> eo);
-        void removeObject(std::shared_ptr<EngineObject> o) {
+        std::vector<std::unique_ptr<EngineObject>> objects;
+        uint64_t addObject(std::unique_ptr<EngineObject> eo);
+        void removeObject(uint64_t id) {
             for (auto it = this->objects.begin(); it != this->objects.end(); it++) {
-                if ((*it).get() == o.get()) {
+                if ((*it)->id == id) {
                     this->objects.erase(it);
                     return;
                 }
             }
-            throw std::runtime_error("Error");
         }
         void updateObjects() {
             if (this->verbose) {
                 std::cout << "Updating objects\n";
             }
             for (auto i = this->objects.end() - 1; i >= this->objects.begin();) {
-                if (*i == nullptr) {
+                //std::cout << "Object" << "\n";
+                float x = (*i)->p.x;
+                float y = (*i)->p.y;
+                //std::cout << "Position " + std::to_string(x) + " " + std::to_string(y) + "\n";
+                if (x < 0 || y < 0 || x >= this->image.width || y >= this->image.height) {
+                    std::cout << "Removing object" << std::endl;;
                     this->objects.erase(i);
-                } else {
-                    //std::cout << "Object" << "\n";
-                    float x = (*i)->p.x;
-                    float y = (*i)->p.y;
-                    //std::cout << "Position " + std::to_string(x) + " " + std::to_string(y) + "\n";
-                    if (x < 0 || y < 0 || x >= this->image.width || y >= this->image.height) {
-                        this->objects.erase(i);
-                    }
                 }
                 i--;
             }
-            for (auto eo : this->objects) {
+            for (auto &eo : this->objects) {
                 eo->updateVelocity();
                 eo->p.x += eo->v.x;
                 eo->p.y += eo->v.y;
@@ -282,7 +293,7 @@ class Engine {
             if (this->verbose) {
                 std::cout << "Loading objects\n";
             }
-            for (auto eo : this->objects) {
+            for (auto &eo : this->objects) {
                 for (Pixel &p : eo->getPixels()) {
                     if (p.p.x < 0 || p.p.x > this->image.width || p.p.y < 0 || p.p.y >= this->image.height) {
                         continue;

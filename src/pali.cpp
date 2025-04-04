@@ -62,9 +62,16 @@ void Engine::loop() {
     usleep(10000);
 }
 
-void Engine::addObject(std::shared_ptr<EngineObject> eo) {
+uint64_t Engine::addObject(std::unique_ptr<EngineObject> eo) {
     if (this->verbose) {
         std::cout << "Object" << std::endl;
     }
-    this->objects.push_back(eo);
+    uint64_t id = this->id;
+    this->id += 1;
+    eo->id = id;
+    this->objects.push_back(std::move(eo));
+    if (this->verbose) {
+        std::cout << "Valid" << std::endl;
+    }
+    return id;
 }
