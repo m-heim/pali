@@ -45,13 +45,23 @@ void i(std::queue<char> *q) {
 
 }
 
+std::string getString(int v) {
+    std::string s = "";
+    if (v % 2 == 1) {
+        s = '=';
+    } else {
+        s = '|';
+    }
+    return s;
+}
+
 
 int main() {
     std::queue<char> queue;
     Engine engine(42, 42, false);
     std::queue<PixelObject> q;
-    std::string value = "A";
-    PixelProperties pp = PixelProperties(value, RGB(74, 74, 74));
+    std::string value = "#";
+    PixelProperties pp = PixelProperties(value, RGB(221, 0, 0));
     std::random_device rd;  // a seed source for the random number engine
     std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
     std::uniform_int_distribution<> distrib(0, 42);
@@ -62,6 +72,7 @@ int main() {
     std::size_t s = 0;
     std::queue<uint64_t> v;
     for (int i = 0; i < 10; i++) {
+        pp.setValue(getString(dir));
         auto po = std::make_unique<PixelObject>(PixelObject(Point(x, y), pp));
         //po->setVelocity(Point(0, 1));
         uint64_t vi = engine.addObject(std::move(po));
@@ -102,6 +113,7 @@ int main() {
             engine.removeObject(vi);
         }
         if (x > 0 && x < 42 && y > 0 && y < 42) {
+            pp.setValue(getString(dir));
             auto po = std::make_unique<PixelObject>(PixelObject(Point(x, y), pp));
             uint64_t vi = engine.addObject(std::move(po));
             v.push(vi);
@@ -110,7 +122,8 @@ int main() {
             int vx = distrib(gen);
             int vy = distrib(gen);
             auto ppv = pp;
-            ppv.setValue("B");
+            ppv.setValue("A");
+            ppv.setColor(RGB(0, 221, 0));
             auto po = std::make_unique<PixelObject>(PixelObject(Point(vx, vy), ppv));
             engine.addObject(std::move(po));
             i = 0;

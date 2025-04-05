@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
     
     float x = distrib(gen);
     x += 200;
-    x /= 1000;
+    x /= 100;
 
     float r = distrib(gen);
     r += 340;
