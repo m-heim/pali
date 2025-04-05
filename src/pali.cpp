@@ -5,11 +5,11 @@
 
 std::string PixelProperties::getValue() {
     //std::cout << "Getting value " + this->value + "\n";
-    return " " + this->value + " ";
+    return " \u001b[38;2;" + std::to_string(this->color.red) + ';' + std::to_string(this->color.green) + ';' + std::to_string(this->color.blue) + 'm' + this->value + " ";
 }
 
 void Image::print() {
-    std::string s = "";
+    std::string s = "\u001b[2J\n\n\n\n\n\n\n\u001b[48;2;0;0;0m";
     s.reserve(this->height * this->width * 4);
     for (int i = this->height - 1; i >= 0; i--) {
         //s += std::to_string(i);
@@ -47,6 +47,7 @@ void Engine::loop() {
     //    v += '\n';
     //}
     //std::cout << v;
+    //std::cout << "\u001b[2J" << std::endl;
     this->image.print();
     if (this->verbose) {
         std::cout << "Objects " + std::to_string(this->objects.size()) + "\n";
@@ -59,7 +60,7 @@ void Engine::loop() {
     if (this->verbose) {
         std::cout << std::to_string(this->u) << std::endl;
     }
-    usleep(10000);
+    usleep(1000000);
 }
 
 uint64_t Engine::addObject(std::unique_ptr<EngineObject> eo) {

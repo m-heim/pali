@@ -44,6 +44,9 @@ class PixelProperties {
         void setValue(std::string value) {
             this->value = value;
         }
+        void setColor(RGB color) {
+            this->color = color;
+        }
 };
 
 class Pixel {
@@ -285,8 +288,8 @@ class Engine {
             }
             for (auto &eo : this->objects) {
                 eo->updateVelocity();
-                eo->p.x += eo->v.x;
-                eo->p.y += eo->v.y;
+                eo->p.x += eo->v.x * this->u / 1000000.0;
+                eo->p.y += eo->v.y * this->u / 1000000.0;;
             }
         }
         void loadObjects() {
