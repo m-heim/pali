@@ -59,7 +59,7 @@ int main() {
   Engine engine(42, 42, false);
   std::queue<PixelObject> q;
   std::string value = "#";
-  PixelProperties pp = PixelProperties(value, RGB(221, 0, 0));
+  PixelProperties pp = PixelProperties(value, RGB(221, 0, 0), RGB(0, 0, 0));
   std::random_device rd;  // a seed source for the random number engine
   std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
   std::uniform_int_distribution<> distrib(0, 42);
@@ -121,7 +121,7 @@ int main() {
       int vy = distrib(gen);
       auto ppv = pp;
       ppv.setValue("A");
-      ppv.setColor(RGB(0, 221, 0));
+      ppv.setColor2(RGB(0, 221, 0));
       auto po = std::make_unique<PixelObject>(PixelObject(Point(vx, vy), ppv));
       engine.addObject(std::move(po));
       i = 0;
@@ -139,7 +139,7 @@ int main() {
       x -= 1;
     }
     i += 1;
-    usleep(100000);
+    usleep(10000);
   }
   j.join();
   return 0;

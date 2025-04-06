@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 
+#define HEIGHT 84
+#define WIDTH 84
+
 int main(int argc, char **argv) {
   bool verbose = false;
   if (argc > 1) {
@@ -15,29 +18,29 @@ int main(int argc, char **argv) {
       }
     }
   }
-  Engine engine(84, 84, verbose);
-  std::string value = "#";
+  Engine engine(HEIGHT, WIDTH, verbose);
+  std::string value = " ";
   while (1) {
-    PixelProperties pp = PixelProperties(value, RGB(74, 74, 74));
+    PixelProperties pp = PixelProperties(value, RGB(0, 0, 0), RGB(0, 0, 0));
     std::random_device rd;  // a seed source for the random number engine
     std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
     std::uniform_int_distribution<> distrib(-100, 100);
 
-    for (int i = 0; i < 84; i++) {   // y axis
-      for (int j = 0; j < 84; j++) { // x axis
-        double zj = (j - 42) / 24.0;
-        double zi = (i - 42) / 24.0;
-        for (int v = 0; v < 8; v++) {
+    for (int i = 0; i < HEIGHT; i++) {   // y axis
+      for (int j = 0; j < WIDTH; j++) { // x axis
+        double zj = (j - (WIDTH / 2.0)) / (WIDTH / 4.0);
+        double zi = (i - (HEIGHT / 2.0)) / (HEIGHT / 4.0);
+        for (int v = 0; v < 32; v++) {
           zi = zj * zi + zi * zj;
-          zj = zi * zi - zj * zj;
-          if (zi * zi + zj * zj > 10000000) {
+          zj = zj * zj - zi * zi;
+          if (zj * zj + zi * zi > 1000) {
             std::cout << "Diverged" << std::to_string(v) << std::endl;
-            pp.setColor(
-                RGB((v >> 2) * 24, (v >> 1) & 0x03 * 24, (v & 0x03) * 24));
+            pp.setColor2(
+                RGB((v << 3), 128 - (v << 3), 255 - (v << 3)));
             break;
           }
-          if (v == 99) {
-            pp.setColor(RGB(0, 0, 0));
+          if (v == 31) {
+            pp.setColor2(RGB(0, 0, 0));
           }
         }
         std::cout << std::to_string(zi * zi + zj * zj) << std::endl;
