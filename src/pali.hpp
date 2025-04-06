@@ -34,15 +34,18 @@ public:
 class PixelProperties {
 public:
   PixelProperties() {}
-  PixelProperties(std::string value, RGB color) {
+  PixelProperties(std::string value, RGB color1, RGB color2) {
     this->value = value;
-    this->color = color;
+    this->color1 = color1;
+    this->color2 = color2;
   }
   std::string value;
-  RGB color;
+  RGB color1;
+  RGB color2;
   std::string getValue();
   void setValue(std::string value) { this->value = value; }
-  void setColor(RGB color) { this->color = color; }
+  void setColor1(RGB color) { this->color1 = color; }
+  void setColor2(RGB color) {this->color2 = color; }
 };
 
 class Pixel {
@@ -65,7 +68,7 @@ public:
     int i = height * width;
     std::cout << "Allocating " + std::to_string(i) + "\n";
     this->pixels = std::vector<PixelProperties>(i);
-    this->PIXEL_EMPTY = PixelProperties(" ", RGB(0, 0, 0));
+    this->PIXEL_EMPTY = PixelProperties(" ", RGB(255, 255, 255), RGB(0, 0, 0));
   }
   int height;
   int width;
@@ -170,7 +173,7 @@ public:
     std::vector<Pixel> v;
     for (int i = 0; i < height; i++) {
       for (int j = 0; j < width; j++) {
-        v.push_back(Pixel(Point(this->p.x + i, this->p.y + j), this->pp));
+        v.push_back(Pixel(Point(this->p.x + j, this->p.y + i), this->pp));
       }
     }
     return v;
@@ -237,7 +240,7 @@ private:
     for (char v : this->s) {
       vals.push_back(
           Pixel(Point(this->p.x + i, this->p.y),
-                PixelProperties(std::string(1, v), RGB(84, 84, 84))));
+                PixelProperties(std::string(1, v), RGB(255, 255, 255), RGB(0, 0, 0))));
       i += 1;
     }
     return vals;
