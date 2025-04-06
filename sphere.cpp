@@ -10,7 +10,7 @@ int main() {
   std::string value = "o";
   int i = 0;
   while (i < 1000) {
-    PixelProperties pp = PixelProperties(value, RGB(74, 74, 74));
+    PixelProperties pp = PixelProperties(value, RGB(74, 74, 74), RGB(0, 0, 0));
     std::random_device rd;  // a seed source for the random number engine
     std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
     std::uniform_int_distribution<> distrib(-10, 10);

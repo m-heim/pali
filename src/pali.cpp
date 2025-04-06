@@ -3,17 +3,10 @@
 #include <iostream>
 #include <unistd.h>
 
-std::string PixelProperties::getValue() {
-  // std::cout << "Getting value " + this->value + "\n";
-  return "\u001b[48;2;" + std::to_string(this->color2.red) + ';' +
-         std::to_string(this->color2.green) + ';' +
-         std::to_string(this->color2.blue) + 'm' + " \u001b[38;2;" + std::to_string(this->color1.red) + ';' +
-         std::to_string(this->color1.green) + ';' +
-         std::to_string(this->color1.blue) + 'm' + this->value + " \u001b[0m";
-}
-
 void Image::print() {
-  std::string s = "\u001b[2J\n\n\n\n\n\n\n\u001b[48;2;0;0;0m";
+  std::string s = "\u001b[2J";
+  RGB color1 = RGB(0, 0, 0);
+  RGB color2 = RGB(0, 0, 0);
   s.reserve(this->height * this->width * 4);
   for (int i = this->height - 1; i >= 0; i--) {
     // s += std::to_string(i);
@@ -22,10 +15,24 @@ void Image::print() {
       // if (v == "   ") {
       //     std::cout << "found value\n";
       // }
-      s += this->pixels[(i * width) + j].getValue();
+      auto p = this->pixels[(i * width) + j];
+      if (j == 0 || p.color2 != color2)  {
+        s += "\u001b[48;2;" + std::to_string(p.color2.red) + ';' +
+            std::to_string(p.color2.green) + ';' +
+            std::to_string(p.color2.blue) + 'm';
+      }
+      if (j == 0 || p.color1 != color1) {
+        s += "\u001b[38;2;" + std::to_string(p.color1.red) + ';' +
+           std::to_string(p.color1.green) + ';' +
+           std::to_string(p.color1.blue) + 'm';
     }
-    s += "\n";
+    color1 = p.color1;
+    color2 = p.color2;
+      s += p.value + "";
+    }
+    s += "\u001b[0m\n";
   }
+  usleep(10000);
   std::cout << s;
 }
 
@@ -76,7 +83,7 @@ void Engine::loop() {
   this->u = i - this->p;
   this->p = i;
   if (this->verbose) {
-    std::cout << std::to_string(this->u) << std::endl;
+    std::cout << std::to_string((this->u - 110000) / 1000) << std::endl;
   }
   usleep(10000);
 }

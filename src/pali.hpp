@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iostream>
 #include <memory>
+#include <cstring>
 #include <string>
 #include <vector>
 
@@ -26,6 +27,12 @@ public:
     this->blue = blue;
     this->red = red;
   }
+  inline bool operator==(const RGB &rhs) const {
+    return std::memcmp(this, &rhs, sizeof(RGB)) == 0;
+  }
+  inline bool operator !=(const RGB&rhs) const {
+    return std::memcmp(this, &rhs, sizeof(RGB)) != 0;
+  }
   int green;
   int red;
   int blue;
@@ -42,7 +49,14 @@ public:
   std::string value;
   RGB color1;
   RGB color2;
-  std::string getValue();
+  std::string getValue() {
+    // std::cout << "Getting value " + this->value + "\n";
+    return "\u001b[48;2;" + std::to_string(this->color2.red) + ';' +
+           std::to_string(this->color2.green) + ';' +
+           std::to_string(this->color2.blue) + 'm' + "\u001b[38;2;" + std::to_string(this->color1.red) + ';' +
+           std::to_string(this->color1.green) + ';' +
+           std::to_string(this->color1.blue) + 'm' + this->value + "\u001b[0m";
+  }
   void setValue(std::string value) { this->value = value; }
   void setColor1(RGB color) { this->color1 = color; }
   void setColor2(RGB color) {this->color2 = color; }
@@ -273,6 +287,9 @@ public:
       }
     }
   }
+  void emptyObjs() {
+    this->objects.clear();
+  }
   void updateObjects() {
     if (this->verbose) {
       std::cout << "Updating objects\n";
@@ -284,7 +301,7 @@ public:
       // std::cout << "Position " + std::to_string(x) + " " + std::to_string(y)
       // + "\n";
       if (x < 0 || y < 0 || x >= this->image.width || y >= this->image.height) {
-        std::cout << "Removing object" << std::endl;
+        //std::cout << "Removing object" << std::endl;
         ;
         this->objects.erase(i);
       }

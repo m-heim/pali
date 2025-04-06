@@ -1,11 +1,10 @@
 #include "src/pali.hpp"
-#include <iostream>
 #include <memory>
-#include <random>
+#include <unistd.h>
 #include <string>
-#include <vector>
+#include <iostream>
 
-#define HEIGHT 84
+#define HEIGHT 43
 #define WIDTH 84
 
 int main(int argc, char **argv) {
@@ -20,21 +19,23 @@ int main(int argc, char **argv) {
   }
   Engine engine(HEIGHT, WIDTH, verbose);
   std::string value = " ";
+  double px = -1.41;
+  double py = 0.111;
+  double vxy = 3;
+  std::vector<uint64_t> v;
   while (1) {
     PixelProperties pp = PixelProperties(value, RGB(0, 0, 0), RGB(0, 0, 0));
-    std::random_device rd;  // a seed source for the random number engine
-    std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
-    std::uniform_int_distribution<> distrib(-100, 100);
-
     for (int i = 0; i < HEIGHT; i++) {   // y axis
       for (int j = 0; j < WIDTH; j++) { // x axis
-        double zj = (j - (WIDTH / 2.0)) / (WIDTH / 4.0);
-        double zi = (i - (HEIGHT / 2.0)) / (HEIGHT / 4.0);
+        double x = px + (((j - (WIDTH / 2.0)) / (WIDTH / 2.0)) * vxy);
+        double y = py + (((i - (HEIGHT / 2.0)) / (HEIGHT / 2.0)) * vxy);
+        double zj = x;
+        double zi = y;
         for (int v = 0; v < 32; v++) {
-          zi = zj * zi + zi * zj;
-          zj = zj * zj - zi * zi;
-          if (zj * zj + zi * zi > 1000) {
-            std::cout << "Diverged" << std::to_string(v) << std::endl;
+          zj = zj * zj - zi * zi + x;
+          zi = zj * zi + zi * zj + y;
+          if (zj * zj + zi * zi > 4) {
+            //std::cout << "Diverged" << std::to_string(v) << std::endl;
             pp.setColor2(
                 RGB((v << 3), 128 - (v << 3), 255 - (v << 3)));
             break;
@@ -43,17 +44,21 @@ int main(int argc, char **argv) {
             pp.setColor2(RGB(0, 0, 0));
           }
         }
-        std::cout << std::to_string(zi * zi + zj * zj) << std::endl;
+        //std::cout << std::to_string(zi * zi + zj * zj) << std::endl;
         auto po = std::make_unique<PixelObject>(PixelObject(Point(j, i), pp));
-        engine.addObject(std::move(po));
+        uint64_t ve = engine.addObject(std::move(po));
+        v.push_back(ve);
       }
     }
     // po->setVelocity(Point(x / 24.0,y / 24.0));
 
-    std::cout << "Looping\n";
+    //std::cout << "Looping\n";
     engine.loop();
-    while (1) {
-    }
+    //std::cout << 1 / vxy << std::endl;
+    usleep(40000);
+    engine.emptyObjs();
+    
+    vxy = vxy / 1.11;
   }
   return 0;
 }

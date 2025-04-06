@@ -80,9 +80,9 @@ int main() {
   }
   int i = 0;
   while (1) {
-    std::cout << "Looping\n";
-    std::cout << "Queue" << std::to_string(v.size()) << std::endl;
-    std::cout << std::to_string(x) << " " << std::to_string(y) << std::endl;
+    //std::cout << "Looping\n";
+    //std::cout << "Queue" << std::to_string(v.size()) << std::endl;
+    //std::cout << std::to_string(x) << " " << std::to_string(y) << std::endl;
     engine.loop();
     if (!queue.empty()) {
       char v = queue.front();
