@@ -19,9 +19,12 @@ int main(int argc, char **argv) {
   }
   Engine engine(HEIGHT, WIDTH, verbose);
   std::string value = " ";
-  PixelProperties pp = PixelProperties(value, RGB(0, 0, 0), RGB(0, 0, 0));
-  auto so = std::make_unique<StringObject>(StringObject(Point(10, 10), "Hello world"));
-  engine.addObject(std::move(so));
+  PixelProperties pp = PixelProperties(value, RGB(0, 0, 0), RGB(0, 255, 0));
+  auto so1 = std::make_unique<StringObject>(StringObject(Point(10, 10), "Hello world", RGB(0, 0, 0), RGB(255, 255, 255)));
+  engine.addObject(std::move(so1));
+  auto so2 = std::make_unique<RectangleObject>(RectangleObject(Point(9, 9), pp, 3, 13, false));
+  engine.addObject(std::move(so2));
+  engine.setPosition(Point(10, 10));
   while (1) {
     engine.loop();
     usleep(100000);
