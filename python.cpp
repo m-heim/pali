@@ -10,6 +10,9 @@
 #include <unistd.h>
 #include <vector>
 
+#define HEIGHT 43
+#define WIDTH 242
+
 void enableRawMode() {
   struct termios t;
   tcgetattr(STDIN_FILENO, &t);          // Get current terminal attributes
@@ -47,22 +50,23 @@ void i(std::queue<char> *q) {
 std::string getString(int v) {
   std::string s = "";
   if (v % 2 == 1) {
-    s = '=';
+    s = "  ";
   } else {
-    s = '|';
+    s = " ";
   }
   return s;
 }
 
 int main() {
+s:
   std::queue<char> queue;
-  Engine engine(42, 42, false);
+  Engine engine(HEIGHT, WIDTH, false);
   std::queue<PixelObject> q;
   std::string value = "#";
   PixelProperties pp = PixelProperties(value, RGB(221, 0, 0), RGB(0, 0, 0));
   std::random_device rd;  // a seed source for the random number engine
   std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
-  std::uniform_int_distribution<> distrib(0, 42);
+  std::uniform_int_distribution<> distrib(0, WIDTH - 1);
   int x = 10;
   int y = 10;
   int dir = 0;
@@ -110,15 +114,27 @@ int main() {
       v.pop();
       engine.removeObject(vi);
     }
-    if (x > 0 && x < 42 && y > 0 && y < 42) {
-      pp.setValue(getString(dir));
-      auto po = std::make_unique<PixelObject>(PixelObject(Point(x, y), pp));
-      uint64_t vi = engine.addObject(std::move(po));
+    if (x > 0 && x < WIDTH && y > 0 && y < HEIGHT) {
+      std::string eo = "  ";
+      auto so = std::make_unique<StringObject>(StringObject(Point(x, y), eo, RGB(0, 0, 0), RGB(221, 0, 0)));
+      uint64_t vi = engine.addObject(std::move(so));
       v.push(vi);
+    } else {
+      engine.emptyObjs();
+      auto so = std::make_unique<StringObject>(StringObject(Point(WIDTH / 2.0, HEIGHT / 2.0), "Game over", RGB(0, 221, 0), RGB(221, 0, 0)));
+      engine.addObject(std::move(so));
+      engine.loop();
+      int i = 0;
+      while (i != 's') {
+        if (!queue.empty()) {
+          i = queue.front();
+          queue.pop();
+        }
+      }
     }
     if (i == 100) {
       int vx = distrib(gen);
-      int vy = distrib(gen);
+      int vy = ((double) distrib(gen) / (double) WIDTH) * HEIGHT;
       auto ppv = pp;
       ppv.setValue("A");
       ppv.setColor2(RGB(0, 221, 0));
@@ -130,13 +146,13 @@ int main() {
       y += 1;
     }
     if (dir == 1) {
-      x += 1;
+      x += 2;
     }
     if (dir == 2) {
       y -= 1;
     }
     if (dir == 3) {
-      x -= 1;
+      x -= 2;
     }
     i += 1;
     usleep(10000);
