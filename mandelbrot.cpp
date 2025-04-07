@@ -19,9 +19,9 @@ int main(int argc, char **argv) {
   }
   Engine engine(HEIGHT, WIDTH, verbose);
   std::string value = " ";
-  double px = -1.41;
-  double py = 0.111;
-  double vxy = 3;
+  double px = 0;
+  double py = 0;
+  double vxy = 2.4;
   std::vector<uint64_t> v;
   while (1) {
     PixelProperties pp = PixelProperties(value, RGB(0, 0, 0), RGB(0, 0, 0));
@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
     usleep(40000);
     engine.emptyObjs();
     
-    vxy = vxy / 1.11;
+    vxy = vxy / 1;
   }
   return 0;
 }
