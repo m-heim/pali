@@ -177,17 +177,20 @@ private:
 class RectangleObject : public EngineObject {
 public:
   RectangleObject() {}
-  RectangleObject(Point p, PixelProperties pp, int height, int width) {
+  RectangleObject(Point p, PixelProperties pp, int height, int width, bool fill) {
     this->pp = pp;
     this->p = p;
     this->height = height;
     this->width = width;
+    this->fill = fill;
   }
   std::vector<Pixel> getPixels() override {
     std::vector<Pixel> v;
     for (int i = 0; i < height; i++) {
       for (int j = 0; j < width; j++) {
-        v.push_back(Pixel(Point(this->p.x + j, this->p.y + i), this->pp));
+        if (this->fill || i == 0 || i == (height - 1) || j == 0 || j == (width - 1)) {
+          v.push_back(Pixel(Point(this->p.x + j, this->p.y + i), this->pp));
+        }
       }
     }
     return v;
@@ -198,6 +201,7 @@ private:
   int height;
   int width;
   PixelProperties pp;
+  bool fill;
 };
 
 class SnowObject : public EngineObject {
@@ -240,21 +244,25 @@ private:
 class StringObject : public EngineObject {
 public:
   StringObject() {}
-  StringObject(Point p, std::string s) {
+  StringObject(Point p, std::string s, RGB color1, RGB color2) {
     this->p = p;
     this->s = s;
     this->v = Point(0, 0);
+    this->color1 = color1;
+    this->color2 = color2;
   }
 
 private:
   std::string s;
+  RGB color1;
+  RGB color2;
   std::vector<Pixel> getPixels() override {
     std::vector<Pixel> vals;
     int i = 0;
     for (char v : this->s) {
       vals.push_back(
           Pixel(Point(this->p.x + i, this->p.y),
-                PixelProperties(std::string(1, v), RGB(255, 255, 255), RGB(0, 0, 0))));
+                PixelProperties(std::string(1, v), this->color1, this->color2)));
       i += 1;
     }
     return vals;
@@ -272,6 +280,7 @@ public:
   Image image;
   bool verbose;
   int u;
+  Point position = Point(0, 0);
   uint64_t id = 0;
   uint64_t p = std::chrono::duration_cast<std::chrono::microseconds>(
                    std::chrono::high_resolution_clock::now().time_since_epoch())
@@ -279,6 +288,10 @@ public:
 
   std::vector<std::unique_ptr<EngineObject>> objects;
   uint64_t addObject(std::unique_ptr<EngineObject> eo);
+  void setPosition(Point p) {
+    this->position = p;
+  }
+
   void removeObject(uint64_t id) {
     for (auto it = this->objects.begin(); it != this->objects.end(); it++) {
       if ((*it)->id == id) {

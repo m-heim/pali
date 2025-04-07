@@ -72,6 +72,7 @@ void Engine::loop() {
   // std::cout << v;
   // std::cout << "\u001b[2J" << std::endl;
   this->image.print();
+  std::cout << "\u001b[" + std::to_string((int) this->position.y) + ';' + std::to_string((int) this->position.x) + 'H';
   if (this->verbose) {
     std::cout << "Objects " + std::to_string(this->objects.size()) + "\n";
   }
