@@ -16,18 +16,18 @@ void Image::print() {
       //     std::cout << "found value\n";
       // }
       auto p = this->pixels[(i * width) + j];
-      if (j == 0 || p.color2 != color2)  {
+      if (j == 0 || p.color2 != color2) {
         s += "\u001b[48;2;" + std::to_string(p.color2.red) + ';' +
-            std::to_string(p.color2.green) + ';' +
-            std::to_string(p.color2.blue) + 'm';
+             std::to_string(p.color2.green) + ';' +
+             std::to_string(p.color2.blue) + 'm';
       }
       if (j == 0 || p.color1 != color1) {
         s += "\u001b[38;2;" + std::to_string(p.color1.red) + ';' +
-           std::to_string(p.color1.green) + ';' +
-           std::to_string(p.color1.blue) + 'm';
-    }
-    color1 = p.color1;
-    color2 = p.color2;
+             std::to_string(p.color1.green) + ';' +
+             std::to_string(p.color1.blue) + 'm';
+      }
+      color1 = p.color1;
+      color2 = p.color2;
       s += p.value + "";
     }
     s += "\u001b[0m\n";
@@ -72,7 +72,8 @@ void Engine::loop() {
   // std::cout << v;
   // std::cout << "\u001b[2J" << std::endl;
   this->image.print();
-  std::cout << "\u001b[" + std::to_string((int) this->position.y) + ';' + std::to_string((int) this->position.x) + 'H';
+  std::cout << "\u001b[" + std::to_string((int)this->position.y) + ';' +
+                   std::to_string((int)this->position.x) + 'H';
   if (this->verbose) {
     std::cout << "Objects " + std::to_string(this->objects.size()) + "\n";
   }
