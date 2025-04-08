@@ -19,9 +19,9 @@ int main(int argc, char **argv) {
   }
   Engine engine(HEIGHT, WIDTH, verbose);
   std::string value = " ";
-  double px = -0.34;
-  double py = 0.68;
-  double vxy = 1.1;
+  double px = 0.43;
+  double py = 0.74;
+  double vxy = 2.4;
   std::vector<uint64_t> v;
   while (1) {
     PixelProperties pp = PixelProperties(value, RGB(0, 0, 0), RGB(0, 0, 0));
@@ -56,10 +56,10 @@ int main(int argc, char **argv) {
     //std::cout << "Looping\n";
     engine.loop();
     //std::cout << 1 / vxy << std::endl;
-    usleep(400000);
+    usleep(100000);
     engine.emptyObjs();
     
-    vxy = vxy / 1.041;
+    vxy = vxy / 1.031;
   }
   return 0;
 }
