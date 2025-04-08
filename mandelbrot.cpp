@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
   Engine engine(HEIGHT, WIDTH, verbose);
   std::string value = " ";
   double px = -0.34;
-  double py = 0.74;
+  double py = 0.68;
   double vxy = 1.1;
   std::vector<uint64_t> v;
   while (1) {
@@ -31,9 +31,9 @@ int main(int argc, char **argv) {
         double y = py + (((i - (HEIGHT / 2.0)) / (HEIGHT / 2.0)) * vxy);
         double zj = 0;
         double zi = 0;
-        for (int v = 0; v < 256; v++) {
+        for (int v = 0; v < 256; v += 1) {
           double zj2 = zj;
-          zj = zj * zj - zi * zi + (x / 1);
+          zj = zj * zj - zi * zi + x;
           zi = zj2 * zi + zj2 * zi + y;
           if (zj * zj + zi * zi > 4) {
             //std::cout << "Diverged" << std::to_string(v) << std::endl;
@@ -56,10 +56,10 @@ int main(int argc, char **argv) {
     //std::cout << "Looping\n";
     engine.loop();
     //std::cout << 1 / vxy << std::endl;
-    usleep(100000);
+    usleep(400000);
     engine.emptyObjs();
     
-    vxy = vxy / 1.031;
+    vxy = vxy / 1.041;
   }
   return 0;
 }
