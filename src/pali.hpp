@@ -2,9 +2,9 @@
 #define PALI_HPP
 #include <chrono>
 #include <cmath>
+#include <cstring>
 #include <iostream>
 #include <memory>
-#include <cstring>
 #include <string>
 #include <vector>
 
@@ -30,7 +30,7 @@ public:
   inline bool operator==(const RGB &rhs) const {
     return std::memcmp(this, &rhs, sizeof(RGB)) == 0;
   }
-  inline bool operator !=(const RGB&rhs) const {
+  inline bool operator!=(const RGB &rhs) const {
     return std::memcmp(this, &rhs, sizeof(RGB)) != 0;
   }
   int green;
@@ -53,13 +53,14 @@ public:
     // std::cout << "Getting value " + this->value + "\n";
     return "\u001b[48;2;" + std::to_string(this->color2.red) + ';' +
            std::to_string(this->color2.green) + ';' +
-           std::to_string(this->color2.blue) + 'm' + "\u001b[38;2;" + std::to_string(this->color1.red) + ';' +
+           std::to_string(this->color2.blue) + 'm' + "\u001b[38;2;" +
+           std::to_string(this->color1.red) + ';' +
            std::to_string(this->color1.green) + ';' +
            std::to_string(this->color1.blue) + 'm' + this->value + "\u001b[0m";
   }
   void setValue(std::string value) { this->value = value; }
   void setColor1(RGB color) { this->color1 = color; }
-  void setColor2(RGB color) {this->color2 = color; }
+  void setColor2(RGB color) { this->color2 = color; }
 };
 
 class Pixel {
@@ -177,7 +178,8 @@ private:
 class RectangleObject : public EngineObject {
 public:
   RectangleObject() {}
-  RectangleObject(Point p, PixelProperties pp, int height, int width, bool fill) {
+  RectangleObject(Point p, PixelProperties pp, int height, int width,
+                  bool fill) {
     this->pp = pp;
     this->p = p;
     this->height = height;
@@ -188,7 +190,8 @@ public:
     std::vector<Pixel> v;
     for (int i = 0; i < height; i++) {
       for (int j = 0; j < width; j++) {
-        if (this->fill || i == 0 || i == (height - 1) || j == 0 || j == (width - 1)) {
+        if (this->fill || i == 0 || i == (height - 1) || j == 0 ||
+            j == (width - 1)) {
           v.push_back(Pixel(Point(this->p.x + j, this->p.y + i), this->pp));
         }
       }
@@ -260,9 +263,9 @@ private:
     std::vector<Pixel> vals;
     int i = 0;
     for (char v : this->s) {
-      vals.push_back(
-          Pixel(Point(this->p.x + i, this->p.y),
-                PixelProperties(std::string(1, v), this->color1, this->color2)));
+      vals.push_back(Pixel(
+          Point(this->p.x + i, this->p.y),
+          PixelProperties(std::string(1, v), this->color1, this->color2)));
       i += 1;
     }
     return vals;
@@ -288,9 +291,7 @@ public:
 
   std::vector<std::unique_ptr<EngineObject>> objects;
   uint64_t addObject(std::unique_ptr<EngineObject> eo);
-  void setPosition(Point p) {
-    this->position = p;
-  }
+  void setPosition(Point p) { this->position = p; }
 
   void removeObject(uint64_t id) {
     for (auto it = this->objects.begin(); it != this->objects.end(); it++) {
@@ -300,9 +301,7 @@ public:
       }
     }
   }
-  void emptyObjs() {
-    this->objects.clear();
-  }
+  void emptyObjs() { this->objects.clear(); }
   void updateObjects() {
     if (this->verbose) {
       std::cout << "Updating objects\n";
@@ -314,7 +313,7 @@ public:
       // std::cout << "Position " + std::to_string(x) + " " + std::to_string(y)
       // + "\n";
       if (x < 0 || y < 0 || x >= this->image.width || y >= this->image.height) {
-        //std::cout << "Removing object" << std::endl;
+        // std::cout << "Removing object" << std::endl;
         ;
         this->objects.erase(i);
       }
