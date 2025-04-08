@@ -4,8 +4,8 @@
 #include <string>
 #include <iostream>
 
-#define HEIGHT 43
-#define WIDTH 84
+#define HEIGHT 84
+#define WIDTH 242
 
 int main(int argc, char **argv) {
   bool verbose = false;
@@ -19,9 +19,9 @@ int main(int argc, char **argv) {
   }
   Engine engine(HEIGHT, WIDTH, verbose);
   std::string value = " ";
-  double px = 0;
-  double py = 0;
-  double vxy = 2.4;
+  double px = -0.34;
+  double py = 0.74;
+  double vxy = 1.1;
   std::vector<uint64_t> v;
   while (1) {
     PixelProperties pp = PixelProperties(value, RGB(0, 0, 0), RGB(0, 0, 0));
@@ -29,18 +29,19 @@ int main(int argc, char **argv) {
       for (int j = 0; j < WIDTH; j++) { // x axis
         double x = px + (((j - (WIDTH / 2.0)) / (WIDTH / 2.0)) * vxy);
         double y = py + (((i - (HEIGHT / 2.0)) / (HEIGHT / 2.0)) * vxy);
-        double zj = x;
-        double zi = y;
-        for (int v = 0; v < 32; v++) {
-          zj = zj * zj - zi * zi + x;
-          zi = zj * zi + zi * zj + y;
+        double zj = 0;
+        double zi = 0;
+        for (int v = 0; v < 256; v++) {
+          double zj2 = zj;
+          zj = zj * zj - zi * zi + (x / 1);
+          zi = zj2 * zi + zj2 * zi + y;
           if (zj * zj + zi * zi > 4) {
             //std::cout << "Diverged" << std::to_string(v) << std::endl;
             pp.setColor2(
-                RGB((v << 3), 128 - (v << 3), 255 - (v << 3)));
+                RGB(v, (128 - v) % 256, 255 - v));
             break;
           }
-          if (v == 31) {
+          if (v == 255) {
             pp.setColor2(RGB(0, 0, 0));
           }
         }
@@ -55,10 +56,10 @@ int main(int argc, char **argv) {
     //std::cout << "Looping\n";
     engine.loop();
     //std::cout << 1 / vxy << std::endl;
-    usleep(40000);
+    usleep(100000);
     engine.emptyObjs();
     
-    vxy = vxy / 1;
+    vxy = vxy / 1.031;
   }
   return 0;
 }
