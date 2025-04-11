@@ -4,8 +4,8 @@
 #include <string>
 #include <unistd.h>
 
-#define HEIGHT 84
-#define WIDTH 242
+#define HEIGHT 43
+#define WIDTH 131
 
 int main(int argc, char **argv) {
   bool verbose = false;
@@ -18,6 +18,7 @@ int main(int argc, char **argv) {
     }
   }
   Engine engine(HEIGHT, WIDTH, verbose);
+  engine.setPosition(Point(10, 10));
   std::string value = " ";
   double px = 0.43;
   double py = 0.74;
