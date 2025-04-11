@@ -28,11 +28,12 @@ int main() {
     }
     auto po =
         std::make_unique<SphereObject>(SphereObject(Point(42, 42), pp, r));
-    po->setVelocity(Point(x / 24.0, y / 24.0));
+    po->setVelocity(Point(x, y));
 
     engine.addObject(std::move(po));
     std::cout << "Looping\n";
     engine.loop();
+    usleep(10000);
     i++;
   }
   return 0;
