@@ -3,8 +3,8 @@
 #include <iostream>
 #include <unistd.h>
 
-void Image::print() {
-  std::string s = "\u001b[2J";
+void Image::print(Point p) {
+  std::string s = "\u001b[2J\n";
   RGB color1 = RGB(0, 0, 0);
   RGB color2 = RGB(0, 0, 0);
   s.reserve(this->height * this->width * 4);
@@ -32,35 +32,37 @@ void Image::print() {
     }
     s += "\u001b[0m\n";
   }
-  usleep(10000);
+  s+= "\u001b[" + std::to_string((int)p.y) + ';' + std::to_string((int)p.x) + 'H';
+  //usleep(10000);
   std::cout << s;
 }
 
 void Engine::loop() {
   auto s = std::chrono::high_resolution_clock::now();
+  auto v = s;
   this->image.clear();
-  auto f = std::chrono::high_resolution_clock::now();
+  auto o = std::chrono::high_resolution_clock::now();
   if (this->verbose) {
     std::cout << std::to_string(
-                     std::chrono::duration_cast<std::chrono::microseconds>(f -
+                     std::chrono::duration_cast<std::chrono::microseconds>(o -
                                                                            s)
                          .count())
               << std::endl;
   }
   this->updateObjects();
-  f = std::chrono::high_resolution_clock::now();
+  o = std::chrono::high_resolution_clock::now();
   if (this->verbose) {
     std::cout << std::to_string(
-                     std::chrono::duration_cast<std::chrono::microseconds>(f -
+                     std::chrono::duration_cast<std::chrono::microseconds>(o -
                                                                            s)
                          .count())
               << std::endl;
   }
   this->loadObjects();
-  f = std::chrono::high_resolution_clock::now();
+  o = std::chrono::high_resolution_clock::now();
   if (this->verbose) {
     std::cout << std::to_string(
-                     std::chrono::duration_cast<std::chrono::microseconds>(f -
+                     std::chrono::duration_cast<std::chrono::microseconds>(o -
                                                                            s)
                          .count())
               << std::endl;
@@ -71,23 +73,25 @@ void Engine::loop() {
   // }
   // std::cout << v;
   // std::cout << "\u001b[2J" << std::endl;
-  this->image.print();
-  std::cout << "\u001b[" + std::to_string((int)this->position.y) + ';' +
-                   std::to_string((int)this->position.x) + 'H';
+  //this->screenClear();
+  this->setRealPosition();
+  Point p = this->getRealPosition();
+  this->image.print(p);
   if (this->verbose) {
     std::cout << "Objects " + std::to_string(this->objects.size()) + "\n";
   }
-  f = std::chrono::high_resolution_clock::now();
+  o = std::chrono::high_resolution_clock::now();
   std::cout.flush();
   uint64_t i = std::chrono::duration_cast<std::chrono::microseconds>(
                    std::chrono::high_resolution_clock::now().time_since_epoch())
                    .count();
   this->u = i - this->p;
   this->p = i;
-  if (this->verbose) {
-    std::cout << std::to_string((this->u - 110000) / 1000) << std::endl;
+  o = std::chrono::high_resolution_clock::now();
+  if (1) {
+    std::cout << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(o - s).count()) << std::endl;
   }
-  usleep(10000);
+  //usleep(10000);
 }
 
 uint64_t Engine::addObject(std::unique_ptr<EngineObject> eo) {

@@ -7,6 +7,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
 class Point {
 public:
@@ -89,12 +91,12 @@ public:
   int width;
   PixelProperties PIXEL_EMPTY;
   std::vector<PixelProperties> pixels;
-  void print();
+  void print(Point p);
   void setPixel(PixelProperties pp, Point p) {
     this->pixels[(int)p.y * width + (int)p.x] = pp;
   }
   void setPixel(PixelProperties pp, float x, float y) {
-    this->pixels[(int)y * width + (int)x] = pp;
+    this->pixels[(((int)y) * width) + ((int) x)] = pp;
   }
   void clear() {
     for (int i = 0; i < this->height; i++) {
@@ -273,6 +275,42 @@ private:
   void updateVelocity() override {}
 };
 
+class InputFieldObject : public EngineObject {
+  public:
+  InputFieldObject() {}
+  InputFieldObject(Point p, std::string s, int height, int width, RGB color1, RGB color2, bool border) {
+    this->p = p;
+    this->s = s;
+    this->color1 = color1;
+    this->color2 = color2;
+    this->border = border;
+    this->height = height;
+    this->width = width;
+  }
+  std::string s;
+  bool border;
+  RGB color1;
+  RGB color2;
+  int height;
+  int width;
+  std::vector<Pixel> getPixels() override {
+    std::vector<Pixel> vals;
+    for (int i = 0; i < this->height; i += 1) {
+      for (int j = 0; j < this->width; j += 1) {
+        int posx = this->p.x + j;
+        int posy = this->p.y + this->height - i;
+        std::string vs = " ";
+        if (i * this->width + j < this->s.length()) {
+          vs = std::string(1, this->s.at(i * this->width + j));
+        }
+        vals.push_back(Pixel(Point(posx, posy), PixelProperties(vs, this->color1, this->color2)));
+      }
+    }
+    return vals;
+  }
+  void updateVelocity() override {}
+};
+
 class Engine {
 public:
   Engine() {}
@@ -282,6 +320,8 @@ public:
   }
   Image image;
   bool verbose;
+  int height_real;
+  int width_real;
   int u;
   Point position = Point(0, 0);
   uint64_t id = 0;
@@ -292,6 +332,24 @@ public:
   std::vector<std::unique_ptr<EngineObject>> objects;
   uint64_t addObject(std::unique_ptr<EngineObject> eo);
   void setPosition(Point p) { this->position = p; }
+
+  void setRealPosition() {
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+
+    this->height_real = w.ws_row;
+    this->width_real = w.ws_col;
+  }
+  void screenClear() {
+    std::cout << "\u001b[2J" << std::endl;
+  }
+
+  Point getRealPosition() {
+    Point p;
+    p.x = this->position.x;
+    p.y = this->height_real - this->position.y;
+    return p;
+  }
 
   void removeObject(uint64_t id) {
     for (auto it = this->objects.begin(); it != this->objects.end(); it++) {
