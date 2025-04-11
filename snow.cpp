@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 
+#define HEIGHT 43
+#define WIDTH 242
+
 int main(int argc, char **argv) {
   bool verbose = false;
   if (argc > 1) {
@@ -15,40 +18,45 @@ int main(int argc, char **argv) {
       }
     }
   }
-  Engine engine(84, 84, verbose);
+  Engine engine(43, WIDTH, verbose);
   std::string value = "o";
   int i = 0;
-  auto s = std::make_unique<StringObject>(
-      StringObject(Point(40, 20), "Hello world"));
-  engine.addObject(std::move(s));
-  while (i < 1000) {
-    PixelProperties pp = PixelProperties(value, RGB(74, 74, 74));
+  //auto s = std::make_unique<StringObject>(
+  //    StringObject(Point(40, 20), "Hello world"));
+  //engine.addObject(std::move(s));
+  //std:: cout << "Loop" << std::endl;
+  while (i < 84848484) {
+    PixelProperties pp = PixelProperties(value, RGB(74, 74, 74), RGB(0, 0, 0));
     std::random_device rd;  // a seed source for the random number engine
     std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
     std::uniform_int_distribution<> distrib(-100, 100);
 
     float x = distrib(gen);
     x += 200;
-    x /= 100;
+    x /= 40;
 
     float r = distrib(gen);
-    r += 340;
-    r /= 84;
+    r += 240;
+    r /= 43;
 
     int y = distrib(gen);
     y += 100;
-    y /= 300;
+    y /= 100;
 
     int v = distrib(gen);
     v += 100;
-    v *= 3;
+    v *= WIDTH * 1.0 / 100 / 2;
+
+    if (i % 4 == 0) {
     auto po =
-        std::make_unique<SnowObject>(SnowObject(Point(v, 84), pp, r, x, y));
+        std::make_unique<SnowObject>(SnowObject(Point(v, HEIGHT - 1), pp, r, x, y));
     // po->setVelocity(Point(x / 24.0,y / 24.0));
 
     engine.addObject(std::move(po));
+    }
     std::cout << "Looping\n";
     engine.loop();
+    usleep(100000);
     i++;
   }
   return 0;
