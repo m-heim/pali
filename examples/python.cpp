@@ -1,4 +1,4 @@
-#include "src/pali.hpp"
+#include "pali.hpp"
 #include <cstdio>
 #include <iostream>
 #include <memory>
@@ -13,40 +13,6 @@
 #define HEIGHT 43
 #define WIDTH 242
 
-void enableRawMode() {
-  struct termios t;
-  tcgetattr(STDIN_FILENO, &t);          // Get current terminal attributes
-  t.c_lflag &= ~(ICANON | ECHO);        // Disable canonical mode and echo
-  tcsetattr(STDIN_FILENO, TCSANOW, &t); // Apply changes immediately
-}
-
-void disableRawMode() {
-  struct termios t;
-  tcgetattr(STDIN_FILENO, &t);
-  t.c_lflag |= (ICANON | ECHO); // Re-enable canonical mode and echo
-  tcsetattr(STDIN_FILENO, TCSANOW, &t);
-}
-
-void i(std::queue<char> *q) {
-  enableRawMode();
-  std::cout << "Enter" << std::endl;
-
-  char buf;
-
-  while (1) {
-    buf = std::cin.get();
-    // std::cout << "Vals" << std::endl;
-    // std::cout << buf << std::endl;
-    if (std::cin.eof()) {
-      // std::cout << "Eof" << std::endl;
-      return;
-    }
-    // std::cout << "Have" << std::endl;
-    q->push(buf);
-  }
-  disableRawMode();
-}
-
 std::string getString(int v) {
   std::string s = "";
   if (v % 2 == 1) {
@@ -59,8 +25,7 @@ std::string getString(int v) {
 
 int main() {
 s:
-  std::queue<char> queue;
-  Engine engine(HEIGHT, WIDTH, false);
+  Engine engine(HEIGHT, WIDTH, false, 24);
   std::queue<PixelObject> q;
   std::string value = "#";
   PixelProperties pp = PixelProperties(value, RGB(221, 0, 0), RGB(0, 0, 0));
@@ -70,7 +35,6 @@ s:
   int x = 10;
   int y = 10;
   int dir = 0;
-  std::thread j(i, &queue);
   std::size_t s = 0;
   std::queue<uint64_t> v;
   for (int i = 0; i < 10; i++) {
@@ -88,26 +52,24 @@ s:
     //std::cout << "Queue" << std::to_string(v.size()) << std::endl;
     //std::cout << std::to_string(x) << " " << std::to_string(y) << std::endl;
     engine.loop();
-    if (!queue.empty()) {
-      char v = queue.front();
-      queue.pop();
-      if (v == 'w') {
-        if (dir != 2) {
-          dir = 0;
-        }
-      } else if (v == 'd') {
-        if (dir != 3) {
-          dir = 1;
-        }
-      } else if (v == 's') {
-        if (dir != 0) {
-          dir = 2;
-        }
-      } else if (v == 'a') {
-        if (dir != 1) {
-          dir = 3;
-        }
+    char vq = engine.getInput();
+    if (vq == 'w') {
+      if (dir != 2) {
+        dir = 0;
       }
+    } else if (vq == 'd') {
+      if (dir != 3) {
+        dir = 1;
+      }
+    } else if (vq == 's') {
+      if (dir != 0) {
+        dir = 2;
+      }
+    } else if (vq == 'a') {
+      if (dir != 1) {
+        dir = 3;
+      }
+    } else {
     }
     if (!v.empty()) {
       uint64_t vi = v.front();
@@ -125,19 +87,15 @@ s:
       engine.addObject(std::move(so));
       engine.loop();
       int i = 0;
-      while (i != 's') {
-        if (!queue.empty()) {
-          i = queue.front();
-          queue.pop();
-        }
+      while (engine.getInput() != 's') {
       }
     }
     if (i == 100) {
       int vx = distrib(gen);
       int vy = ((double) distrib(gen) / (double) WIDTH) * HEIGHT;
       auto ppv = pp;
-      ppv.setValue("A");
-      ppv.setColor2(RGB(0, 221, 0));
+      ppv.setValue("🍏");
+      ppv.setColor2(RGB(0, 0, 0));
       auto po = std::make_unique<PixelObject>(PixelObject(Point(vx, vy), ppv));
       engine.addObject(std::move(po));
       i = 0;
@@ -155,8 +113,6 @@ s:
       x -= 2;
     }
     i += 1;
-    usleep(10000);
   }
-  j.join();
   return 0;
 }

@@ -1,4 +1,4 @@
-#include "src/pali.hpp"
+#include "pali.hpp"
 #include <iostream>
 #include <memory>
 #include <string>
