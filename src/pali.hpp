@@ -9,6 +9,12 @@
 #include <vector>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <queue>
+#include <thread>
+
+void enableRawMode();
+void disableRawMode();
+void i(std::queue<char> * q);
 
 class Point {
 public:
@@ -314,23 +320,39 @@ class InputFieldObject : public EngineObject {
 class Engine {
 public:
   Engine() {}
-  Engine(int height, int width, bool verbose) {
+  Engine(int height, int width, bool verbose, double fps = 144.0) {
     this->verbose = verbose;
     this->image = Image(height, width);
+    this->fps = fps;
+    this->queue = std::queue<char>();;
+    this->j = std::thread(i, &this->queue);
+  }
+  ~Engine() {
+    this->j.join();
   }
   Image image;
-  bool verbose;
+  bool verbose; // be verbose
   int height_real;
   int width_real;
-  int u;
-  Point position = Point(0, 0);
+  double fps; // frames per second
+  std::queue<char> queue; // input queue
+  std::thread j; // input thread
+  Point position = Point(0, 0); // position on screen
   uint64_t id = 0;
-  uint64_t p = std::chrono::duration_cast<std::chrono::microseconds>(
-                   std::chrono::high_resolution_clock::now().time_since_epoch())
-                   .count();
+  uint64_t u = 0; // microseconds for frame
+  uint64_t p = 0; // previous position
+  uint64_t pvg = 0;
 
   std::vector<std::unique_ptr<EngineObject>> objects;
   uint64_t addObject(std::unique_ptr<EngineObject> eo);
+  inline char getInput() {
+    if (this->queue.empty()) {
+      return 0;
+    }
+    char v = this->queue.front();
+    this->queue.pop();
+    return v;
+  }
   void setPosition(Point p) { this->position = p; }
 
   void setRealPosition() {

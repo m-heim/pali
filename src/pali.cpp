@@ -1,7 +1,43 @@
 #include "pali.hpp"
 #include <chrono>
 #include <iostream>
+#include <termios.h>
+#include <queue>
 #include <unistd.h>
+
+void enableRawMode() {
+  struct termios t;
+  tcgetattr(STDIN_FILENO, &t);          // Get current terminal attributes
+  t.c_lflag &= ~(ICANON | ECHO);        // Disable canonical mode and echo
+  tcsetattr(STDIN_FILENO, TCSANOW, &t); // Apply changes immediately
+}
+
+void disableRawMode() {
+  struct termios t;
+  tcgetattr(STDIN_FILENO, &t);
+  t.c_lflag |= (ICANON | ECHO); // Re-enable canonical mode and echo
+  tcsetattr(STDIN_FILENO, TCSANOW, &t);
+}
+
+void i(std::queue<char> *q) {
+  enableRawMode();
+  std::cout << "Enter" << std::endl;
+
+  char buf;
+
+  while (1) {
+    buf = std::cin.get();
+    // std::cout << "Vals" << std::endl;
+    // std::cout << buf << std::endl;
+    if (std::cin.eof()) {
+      // std::cout << "Eof" << std::endl;
+      return;
+    }
+    // std::cout << "Have" << std::endl;
+    q->push(buf);
+  }
+  disableRawMode();
+}
 
 void Image::print(Point p) {
   std::string s = "\u001b[2J\n";
@@ -38,60 +74,27 @@ void Image::print(Point p) {
 }
 
 void Engine::loop() {
-  auto s = std::chrono::high_resolution_clock::now();
-  auto v = s;
+  auto valu = 1000000.0 / this->u; // some duration of prev frame
+  auto si = std::make_unique<StringObject>(StringObject(Point(this->image.width - 10, 0), std::to_string(valu), RGB(255, 255, 255), RGB(0, 0, 0)));
+  uint siv = this->addObject(std::move(si));
   this->image.clear();
-  auto o = std::chrono::high_resolution_clock::now();
-  if (this->verbose) {
-    std::cout << std::to_string(
-                     std::chrono::duration_cast<std::chrono::microseconds>(o -
-                                                                           s)
-                         .count())
-              << std::endl;
-  }
   this->updateObjects();
-  o = std::chrono::high_resolution_clock::now();
-  if (this->verbose) {
-    std::cout << std::to_string(
-                     std::chrono::duration_cast<std::chrono::microseconds>(o -
-                                                                           s)
-                         .count())
-              << std::endl;
-  }
   this->loadObjects();
-  o = std::chrono::high_resolution_clock::now();
-  if (this->verbose) {
-    std::cout << std::to_string(
-                     std::chrono::duration_cast<std::chrono::microseconds>(o -
-                                                                           s)
-                         .count())
-              << std::endl;
-  }
-  // std::string v = "";
-  // for (int i = 0; i < 43; i++) {
-  //     v += '\n';
-  // }
-  // std::cout << v;
-  // std::cout << "\u001b[2J" << std::endl;
-  //this->screenClear();
   this->setRealPosition();
   Point p = this->getRealPosition();
   this->image.print(p);
-  if (this->verbose) {
-    std::cout << "Objects " + std::to_string(this->objects.size()) + "\n";
-  }
-  o = std::chrono::high_resolution_clock::now();
   std::cout.flush();
-  uint64_t i = std::chrono::duration_cast<std::chrono::microseconds>(
+  this->removeObject(siv);
+
+  uint64_t i1 = std::chrono::duration_cast<std::chrono::microseconds>(
                    std::chrono::high_resolution_clock::now().time_since_epoch())
                    .count();
-  this->u = i - this->p;
-  this->p = i;
-  o = std::chrono::high_resolution_clock::now();
-  if (1) {
-    std::cout << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(o - s).count()) << std::endl;
+  this->u = i1 - this->p;
+  this->p = i1;
+  auto i3 = (int) (1000000 / this->fps);
+  if (u < i3) {
+    usleep(i3 - u);
   }
-  //usleep(10000);
 }
 
 uint64_t Engine::addObject(std::unique_ptr<EngineObject> eo) {
