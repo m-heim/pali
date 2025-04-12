@@ -1,0 +1,8 @@
+add_executable(python python.cpp)
+add_executable(mandelbrot mandelbrot.cpp)
+add_executable(snow snow.cpp)
+add_executable(sphere sphere.cpp)
+target_link_libraries(python PRIVATE pali)
+target_link_libraries(mandelbrot PRIVATE pali)
+target_link_libraries(snow PRIVATE pali)
+target_link_libraries(sphere PRIVATE pali)
