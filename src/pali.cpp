@@ -1,10 +1,10 @@
 #include "pali.hpp"
+#include <cassert>
 #include <chrono>
 #include <iostream>
-#include <termios.h>
 #include <queue>
+#include <termios.h>
 #include <unistd.h>
-#include <cassert>
 
 void enableRawMode() {
   struct termios t;
@@ -57,15 +57,18 @@ void Image::print(Point p) {
     }
     s += "\u001b[0m\n";
   }
-  s+= "\u001b[" + std::to_string((int)p.y) + ';' + std::to_string((int)p.x) + 'H';
-  //usleep(10000);
+  s += "\u001b[" + std::to_string((int)p.y) + ';' + std::to_string((int)p.x) +
+       'H';
+  // usleep(10000);
   std::cout << s;
 }
 
 void Engine::loop() {
   auto valu = 1000000.0 / this->u; // some duration of prev frame
-  auto si = std::make_unique<StringObject>(StringObject(Point(this->image.width - 10, 0), std::to_string(valu), RGB(255, 255, 255), RGB(0, 0, 0)));
-  //uint siv = this->addObject(std::move(si));
+  auto si = std::make_unique<StringObject>(
+      StringObject(Point(this->image.width - 10, 0), std::to_string(valu),
+                   RGB(255, 255, 255), RGB(0, 0, 0)));
+  // uint siv = this->addObject(std::move(si));
   this->image.clear();
   this->updateObjects();
   this->loadObjects();
@@ -73,18 +76,19 @@ void Engine::loop() {
   Point p = this->getRealPosition();
   this->image.print(p);
   std::cout.flush();
-  //this->removeObject(siv);
+  // this->removeObject(siv);
 
-  uint64_t i1 = std::chrono::duration_cast<std::chrono::microseconds>(
-                   std::chrono::high_resolution_clock::now().time_since_epoch())
-                   .count();
+  uint64_t i1 =
+      std::chrono::duration_cast<std::chrono::microseconds>(
+          std::chrono::high_resolution_clock::now().time_since_epoch())
+          .count();
   int u = i1 - this->p;
   if (u < 0) {
     u = 0;
   }
   this->u = u;
   this->p = i1;
-  auto i3 = (int) (1000000 / this->fps);
+  auto i3 = (int)(1000000 / this->fps);
   if (u < i3) {
     usleep(i3 - u);
   }
