@@ -4,18 +4,18 @@
 #include <cmath>
 #include <cstring>
 #include <iostream>
-#include <memory>
-#include <thread>
-#include <string>
-#include <vector>
-#include <sys/ioctl.h>
 #include <map>
-#include <unistd.h>
+#include <memory>
 #include <queue>
+#include <string>
+#include <sys/ioctl.h>
+#include <thread>
+#include <unistd.h>
+#include <vector>
 
 void enableRawMode();
 void disableRawMode();
-void i(std::queue<char> * q);
+void i(std::queue<char> *q);
 
 static uint64_t idgv = 0;
 
@@ -105,7 +105,7 @@ public:
     this->pixels[(int)p.y * width + (int)p.x] = pp;
   }
   void setPixel(PixelProperties pp, float x, float y) {
-    this->pixels[(((int)y) * width) + ((int) x)] = pp;
+    this->pixels[(((int)y) * width) + ((int)x)] = pp;
   }
   void clear() {
     for (int i = 0; i < this->height; i++) {
@@ -156,12 +156,8 @@ public:
   std::vector<Pixel> getPixels() override {
     return std::vector<Pixel>{Pixel(this->p, this->pp)};
   }
-  void updateVelocity(uint64_t u) override {
-    this->updatePosition(u);
-  }
-  void update(uint64_t u) override {
-    this->updateVelocity(u);
-  }
+  void updateVelocity(uint64_t u) override { this->updatePosition(u); }
+  void update(uint64_t u) override { this->updateVelocity(u); }
 
 private:
   PixelProperties pp;
@@ -175,12 +171,8 @@ public:
     this->radius = radius;
     this->pp = pp;
   }
-  void updateVelocity(uint64_t u) override {
-    this->updatePosition(u);
-  }
-  void update(uint64_t u) override {
-    this->updateVelocity(u);
-  }
+  void updateVelocity(uint64_t u) override { this->updatePosition(u); }
+  void update(uint64_t u) override { this->updateVelocity(u); }
 
 private:
   PixelProperties pp;
@@ -224,12 +216,8 @@ public:
     }
     return v;
   }
-  void updateVelocity(uint64_t u) override {
-    this->updatePosition(u);
-  }
-  void update(uint64_t u) override {
-    this->updateVelocity(u);
-  }
+  void updateVelocity(uint64_t u) override { this->updatePosition(u); }
+  void update(uint64_t u) override { this->updateVelocity(u); }
 
 private:
   int height;
@@ -257,9 +245,7 @@ public:
     phase = phase % 80;
     updatePosition(u);
   }
-  void update(uint64_t u) override {
-    this->updateVelocity(u);
-  }
+  void update(uint64_t u) override { this->updateVelocity(u); }
 
 private:
   PixelProperties pp;
@@ -290,12 +276,8 @@ public:
     this->color2 = color2;
   }
 
-  void update(uint64_t u) override {
-    this->updateVelocity(u);
-  }
-  void updateVelocity(uint64_t u) override {
-    this->updatePosition(u);
-  }
+  void update(uint64_t u) override { this->updateVelocity(u); }
+  void updateVelocity(uint64_t u) override { this->updatePosition(u); }
 
 private:
   std::string s;
@@ -315,9 +297,10 @@ private:
 };
 
 class InputFieldObject : public EngineObject {
-  public:
+public:
   InputFieldObject() {}
-  InputFieldObject(Point p, std::string s, int height, int width, RGB color1, RGB color2, bool border) {
+  InputFieldObject(Point p, std::string s, int height, int width, RGB color1,
+                   RGB color2, bool border) {
     this->p = p;
     this->s = s;
     this->color1 = color1;
@@ -342,21 +325,18 @@ class InputFieldObject : public EngineObject {
         if (i * this->width + j < this->s.length()) {
           vs = std::string(1, this->s.at(i * this->width + j));
         }
-        vals.push_back(Pixel(Point(posx, posy), PixelProperties(vs, this->color1, this->color2)));
+        vals.push_back(Pixel(Point(posx, posy),
+                             PixelProperties(vs, this->color1, this->color2)));
       }
     }
     return vals;
   }
-  void updateVelocity(uint64_t u) override {
-    this->updatePosition(u);
-  }
-  void update(uint64_t u) override {
-    this->updateVelocity(u);
-  }
+  void updateVelocity(uint64_t u) override { this->updatePosition(u); }
+  void update(uint64_t u) override { this->updateVelocity(u); }
 };
 
-class FrameObject: public EngineObject {
-  public:
+class FrameObject : public EngineObject {
+public:
   FrameObject() {}
   FrameObject(Point p, int width, int height, RGB color2, bool visible) {
     this->visible = visible;
@@ -417,9 +397,7 @@ class FrameObject: public EngineObject {
       }
     }
   }
-  void updateVelocity(uint64_t u) override {
-    this->updatePosition(u);
-  }
+  void updateVelocity(uint64_t u) override { this->updatePosition(u); }
 };
 
 class Engine {
@@ -429,19 +407,18 @@ public:
     this->verbose = verbose;
     this->image = Image(height, width);
     this->fps = fps;
-    this->queue = std::queue<char>();;
+    this->queue = std::queue<char>();
+    ;
     this->j = std::thread(i, &this->queue);
   }
-  ~Engine() {
-    this->j.join();
-  }
+  ~Engine() { this->j.join(); }
   Image image;
   bool verbose; // be verbose
   int height_real;
   int width_real;
-  double fps; // frames per second
-  std::queue<char> queue; // input queue
-  std::thread j; // input thread
+  double fps;                   // frames per second
+  std::queue<char> queue;       // input queue
+  std::thread j;                // input thread
   Point position = Point(0, 0); // position on screen
   uint64_t id = 0;
   uint64_t u = 0; // microseconds for frame
@@ -467,9 +444,7 @@ public:
     this->height_real = w.ws_row;
     this->width_real = w.ws_col;
   }
-  void screenClear() {
-    std::cout << "\u001b[2J" << std::endl;
-  }
+  void screenClear() { std::cout << "\u001b[2J" << std::endl; }
 
   Point getRealPosition() {
     Point p;
@@ -483,7 +458,7 @@ public:
       this->objects.erase(id);
     }
   }
-  void emptyObjs() {this->objects.clear(); }
+  void emptyObjs() { this->objects.clear(); }
   void updateObjects() {
     for (auto &eo : this->objects) {
       eo.second->update(this->u);
