@@ -41,7 +41,7 @@ void i(std::queue<char> *q) {
 }
 
 void Image::print(Point p) {
-  std::string s = "\u001b[2J\n";
+  std::string s = "";//"\u001b[2J\n";
   RGB color1 = RGB(0, 0, 0);
   RGB color2 = RGB(0, 0, 0);
   s.reserve(this->height * this->width * 4);
@@ -90,7 +90,11 @@ void Engine::loop() {
   uint64_t i1 = std::chrono::duration_cast<std::chrono::microseconds>(
                    std::chrono::high_resolution_clock::now().time_since_epoch())
                    .count();
-  this->u = i1 - this->p;
+  int u = i1 - this->p;
+  if (u < 0) {
+    u = 0;
+  }
+  this->u = u;
   this->p = i1;
   auto i3 = (int) (1000000 / this->fps);
   if (u < i3) {
