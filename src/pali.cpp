@@ -99,10 +99,12 @@ void Engine::loop() {
 }
 
 uint64_t Engine::addObject(std::unique_ptr<EngineObject> eo) {
-  uint64_t id = this->id;
-  this->id += 1;
-  eo->id = id;
-  assert(this->objects.find(id) == this->objects.end());
-  this->objects[id] = std::move(eo);
-  return id;
+  if (this->verbose) {
+    std::cout << "Object" << std::endl;
+  }
+  uint64_t i_ = idgv;
+  assert(this->objects.find(i_) == this->objects.end());
+  this->objects[i_] = std::move(eo);
+  idgv += 1;
+  return i_;
 }

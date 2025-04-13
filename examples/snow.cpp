@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
   //     StringObject(Point(40, 20), "Hello world"));
   // engine.addObject(std::move(s));
   // std:: cout << "Loop" << std::endl;
-  while (i < 84848484) {
+  while (1) {
     PixelProperties pp = PixelProperties(value, RGB(74, 74, 74), RGB(0, 0, 0));
     std::random_device rd;  // a seed source for the random number engine
     std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
@@ -54,7 +54,6 @@ int main(int argc, char **argv) {
 
       engine.addObject(std::move(po));
     }
-    std::cout << "Looping\n";
     engine.loop();
     usleep(100000);
     i++;

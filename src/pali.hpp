@@ -17,6 +17,8 @@ void enableRawMode();
 void disableRawMode();
 void i(std::queue<char> * q);
 
+static uint64_t idgv = 0;
+
 class Point {
 public:
   Point() {}
@@ -134,7 +136,11 @@ public:
     // std::to_string(this->p.y) + " " + "\n";
     this->v = v;
   }
-  virtual void updateVelocity() = 0;
+  virtual void updateVelocity(uint64_t u) = 0;
+  void updatePosition(uint64_t u) {
+    this->p.x += this->v.x * u / 1000000.0;
+    this->p.y += this->v.y * u / 1000000.0;
+  }
   virtual std::vector<Pixel> getPixels() = 0;
   virtual void update(uint64_t u) = 0;
 };
@@ -150,8 +156,11 @@ public:
   std::vector<Pixel> getPixels() override {
     return std::vector<Pixel>{Pixel(this->p, this->pp)};
   }
-  void updateVelocity() override {}
+  void updateVelocity(uint64_t u) override {
+    this->updatePosition(u);
+  }
   void update(uint64_t u) override {
+    this->updateVelocity(u);
   }
 
 private:
@@ -166,8 +175,12 @@ public:
     this->radius = radius;
     this->pp = pp;
   }
-  void updateVelocity() override {}
-  void update(uint64_t u) override {}
+  void updateVelocity(uint64_t u) override {
+    this->updatePosition(u);
+  }
+  void update(uint64_t u) override {
+    this->updateVelocity(u);
+  }
 
 private:
   PixelProperties pp;
@@ -211,8 +224,12 @@ public:
     }
     return v;
   }
-  void updateVelocity() override {}
-  void update(uint64_t) override {}
+  void updateVelocity(uint64_t u) override {
+    this->updatePosition(u);
+  }
+  void update(uint64_t u) override {
+    this->updateVelocity(u);
+  }
 
 private:
   int height;
@@ -234,12 +251,15 @@ public:
     this->shift = shift;
     this->phase = 40;
   }
-  void updateVelocity() override {
+  void updateVelocity(uint64_t u) override {
     this->v = Point((phase - 40) * 0.01 * this->velocity, this->v.y);
     phase += 1;
     phase = phase % 80;
+    updatePosition(u);
   }
-  void update(uint64_t u) override {}
+  void update(uint64_t u) override {
+    this->updateVelocity(u);
+  }
 
 private:
   PixelProperties pp;
@@ -270,7 +290,12 @@ public:
     this->color2 = color2;
   }
 
-  void update(uint64_t u) override {}
+  void update(uint64_t u) override {
+    this->updateVelocity(u);
+  }
+  void updateVelocity(uint64_t u) override {
+    this->updatePosition(u);
+  }
 
 private:
   std::string s;
@@ -287,7 +312,6 @@ private:
     }
     return vals;
   }
-  void updateVelocity() override {}
 };
 
 class InputFieldObject : public EngineObject {
@@ -323,8 +347,12 @@ class InputFieldObject : public EngineObject {
     }
     return vals;
   }
-  void updateVelocity() override {}
-  void update(uint64_t u) override {}
+  void updateVelocity(uint64_t u) override {
+    this->updatePosition(u);
+  }
+  void update(uint64_t u) override {
+    this->updateVelocity(u);
+  }
 };
 
 class FrameObject: public EngineObject {
@@ -342,23 +370,23 @@ class FrameObject: public EngineObject {
   int width;
   int height;
   RGB color2;
-  std::vector<std::unique_ptr<EngineObject>> objects;
-  void addObject(std::unique_ptr<EngineObject> eo) {
-    this->objects.push_back(std::move(eo));
+  std::map<uint64_t, std::unique_ptr<EngineObject>> objects;
+  uint64_t addObject(std::unique_ptr<EngineObject> eo) {
+    uint64_t i_ = idgv;
+    this->objects[i_] = std::move(eo);
+    idgv += 1;
+    return i_;
   }
   void removeObject(uint64_t id) {
-    for (auto it = this->objects.begin(); it != this->objects.end(); it++) {
-      if ((*it)->id == id) {
-        this->objects.erase(it);
-        return;
-      }
+    if (this->objects.find(id) != this->objects.end()) {
+      this->objects.erase(id);
     }
   }
   std::vector<Pixel> getPixels() override {
     std::vector<Pixel> v;
     if (this->visible) {
       for (auto &eo : this->objects) {
-        auto pixels = eo->getPixels();
+        auto pixels = eo.second->getPixels();
         for (auto &p : pixels) {
           v.push_back(p);
         }
@@ -367,31 +395,30 @@ class FrameObject: public EngineObject {
     return v;
   }
   void update(uint64_t u) override {
-    for (auto i = this->objects.end() - 1; i >= this->objects.begin();) {
+    for (auto &eo : this->objects) {
+      eo.second->update(u);
+    }
+    this->updateVelocity(u);
+    auto it = this->objects.begin();
+    while (it != this->objects.end()) {
       // std::cout << "Object" << "\n";
-      float x = (*i)->p.x;
-      float y = (*i)->p.y;
+      float x = it->second->p.x;
+      float y = it->second->p.y;
       // std::cout << "Position " + std::to_string(x) + " " + std::to_string(y)
       // + "\n";
       if (x < 0 || y < 0 || x >= this->width || y >= this->height) {
         // std::cout << "Removing object" << std::endl;
         ;
-        this->objects.erase(i);
+        this->removeObject(it->first);
+        it = this->objects.begin();
+
+      } else {
+        it++;
       }
-      i--;
     }
-    for (auto &eo : this->objects) {
-      eo->update(u);
-    }
-    this->p.x += this->v.x * u / 1000000.0;
-    this->p.y += this->v.y * u / 1000000.0;
   }
-  uint64_t addObject(std::unique_ptr<EngineObject> eo, uint64_t layer) {
-    uint64_t id = this->id;
-    this->id += 1;
-    eo->id = id;
-    this->objects.push_back(std::move(eo));
-    return id;
+  void updateVelocity(uint64_t u) override {
+    this->updatePosition(u);
   }
 };
 
@@ -452,23 +479,34 @@ public:
   }
 
   void removeObject(uint64_t id) {
-    for (auto it = this->objects.begin(); it != this->objects.end(); it++) {
-      if (it->first == id) {
-        this->objects.erase(it);
-        return;
-      }
+    if (this->objects.find(id) != this->objects.end()) {
+      this->objects.erase(id);
     }
   }
-  void emptyObjs() { this->objects.clear(); }
+  void emptyObjs() {this->objects.clear(); }
   void updateObjects() {
     for (auto &eo : this->objects) {
       eo.second->update(this->u);
     }
+    auto it = this->objects.begin();
+    while (it != this->objects.end()) {
+      // std::cout << "Object" << "\n";
+      float x = it->second->p.x;
+      float y = it->second->p.y;
+      // std::cout << "Position " + std::to_string(x) + " " + std::to_string(y)
+      // + "\n";
+      if (x < 0 || y < 0 || x >= this->image.width || y >= this->image.height) {
+        // std::cout << "Removing object" << std::endl;
+        ;
+        this->removeObject(it->first);
+        it = this->objects.begin();
+
+      } else {
+        it++;
+      }
+    }
   }
   void loadObjects() {
-    if (this->verbose) {
-      std::cout << "Loading objects\n";
-    }
     for (auto &eo : this->objects) {
       for (Pixel &p : eo.second->getPixels()) {
         if (p.p.x < 0 || p.p.x > this->image.width || p.p.y < 0 ||
