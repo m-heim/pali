@@ -4,6 +4,7 @@
 #include <termios.h>
 #include <queue>
 #include <unistd.h>
+#include <cassert>
 
 void enableRawMode() {
   struct termios t;
@@ -76,7 +77,7 @@ void Image::print(Point p) {
 void Engine::loop() {
   auto valu = 1000000.0 / this->u; // some duration of prev frame
   auto si = std::make_unique<StringObject>(StringObject(Point(this->image.width - 10, 0), std::to_string(valu), RGB(255, 255, 255), RGB(0, 0, 0)));
-  uint siv = this->addObject(std::move(si));
+  //uint siv = this->addObject(std::move(si));
   this->image.clear();
   this->updateObjects();
   this->loadObjects();
@@ -84,7 +85,7 @@ void Engine::loop() {
   Point p = this->getRealPosition();
   this->image.print(p);
   std::cout.flush();
-  this->removeObject(siv);
+  //this->removeObject(siv);
 
   uint64_t i1 = std::chrono::duration_cast<std::chrono::microseconds>(
                    std::chrono::high_resolution_clock::now().time_since_epoch())
@@ -98,15 +99,10 @@ void Engine::loop() {
 }
 
 uint64_t Engine::addObject(std::unique_ptr<EngineObject> eo) {
-  if (this->verbose) {
-    std::cout << "Object" << std::endl;
-  }
   uint64_t id = this->id;
   this->id += 1;
   eo->id = id;
-  this->objects.push_back(std::move(eo));
-  if (this->verbose) {
-    std::cout << "Valid" << std::endl;
-  }
+  assert(this->objects.find(id) == this->objects.end());
+  this->objects[id] = std::move(eo);
   return id;
 }
