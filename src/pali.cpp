@@ -22,36 +22,24 @@ void disableRawMode() {
 
 void i(std::queue<char> *q) {
   enableRawMode();
-  std::cout << "Enter" << std::endl;
-
   char buf;
-
   while (1) {
     buf = std::cin.get();
-    // std::cout << "Vals" << std::endl;
-    // std::cout << buf << std::endl;
     if (std::cin.eof()) {
-      // std::cout << "Eof" << std::endl;
       return;
     }
-    // std::cout << "Have" << std::endl;
     q->push(buf);
   }
   disableRawMode();
 }
 
 void Image::print(Point p) {
-  std::string s = "";//"\u001b[2J\n";
+  std::string s = "\u001b[2J\n";
   RGB color1 = RGB(0, 0, 0);
   RGB color2 = RGB(0, 0, 0);
   s.reserve(this->height * this->width * 4);
   for (int i = this->height - 1; i >= 0; i--) {
-    // s += std::to_string(i);
     for (int j = 0; j < this->width; j++) {
-      // std::string v = (this->pixels + (i * height) + j)->getValue();
-      // if (v == "   ") {
-      //     std::cout << "found value\n";
-      // }
       auto p = this->pixels[(i * width) + j];
       if (j == 0 || p.color2 != color2) {
         s += "\u001b[48;2;" + std::to_string(p.color2.red) + ';' +
@@ -103,9 +91,6 @@ void Engine::loop() {
 }
 
 uint64_t Engine::addObject(std::unique_ptr<EngineObject> eo) {
-  if (this->verbose) {
-    std::cout << "Object" << std::endl;
-  }
   uint64_t i_ = idgv;
   assert(this->objects.find(i_) == this->objects.end());
   this->objects[i_] = std::move(eo);
