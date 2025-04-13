@@ -21,10 +21,10 @@ int main(int argc, char **argv) {
   Engine engine(43, WIDTH, verbose);
   std::string value = "o";
   int i = 0;
-  //auto s = std::make_unique<StringObject>(
-  //    StringObject(Point(40, 20), "Hello world"));
-  //engine.addObject(std::move(s));
-  //std:: cout << "Loop" << std::endl;
+  // auto s = std::make_unique<StringObject>(
+  //     StringObject(Point(40, 20), "Hello world"));
+  // engine.addObject(std::move(s));
+  // std:: cout << "Loop" << std::endl;
   while (i < 84848484) {
     PixelProperties pp = PixelProperties(value, RGB(74, 74, 74), RGB(0, 0, 0));
     std::random_device rd;  // a seed source for the random number engine
@@ -48,11 +48,11 @@ int main(int argc, char **argv) {
     v *= WIDTH * 1.0 / 100 / 2;
 
     if (i % 4 == 0) {
-    auto po =
-        std::make_unique<SnowObject>(SnowObject(Point(v, HEIGHT - 1), pp, r, x, y));
-    // po->setVelocity(Point(x / 24.0,y / 24.0));
+      auto po = std::make_unique<SnowObject>(
+          SnowObject(Point(v, HEIGHT - 1), pp, r, x, y));
+      // po->setVelocity(Point(x / 24.0,y / 24.0));
 
-    engine.addObject(std::move(po));
+      engine.addObject(std::move(po));
     }
     std::cout << "Looping\n";
     engine.loop();
