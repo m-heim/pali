@@ -48,9 +48,9 @@ s:
   }
   int i = 0;
   while (1) {
-    //std::cout << "Looping\n";
-    //std::cout << "Queue" << std::to_string(v.size()) << std::endl;
-    //std::cout << std::to_string(x) << " " << std::to_string(y) << std::endl;
+    // std::cout << "Looping\n";
+    // std::cout << "Queue" << std::to_string(v.size()) << std::endl;
+    // std::cout << std::to_string(x) << " " << std::to_string(y) << std::endl;
     engine.loop();
     char vq = engine.getInput();
     if (vq == 'w') {
@@ -78,12 +78,15 @@ s:
     }
     if (x > 0 && x < WIDTH && y > 0 && y < HEIGHT) {
       std::string eo = "  ";
-      auto so = std::make_unique<StringObject>(StringObject(Point(x, y), eo, RGB(0, 0, 0), RGB(221, 0, 0)));
+      auto so = std::make_unique<StringObject>(
+          StringObject(Point(x, y), eo, RGB(0, 0, 0), RGB(221, 0, 0)));
       uint64_t vi = engine.addObject(std::move(so));
       v.push(vi);
     } else {
       engine.emptyObjs();
-      auto so = std::make_unique<StringObject>(StringObject(Point(WIDTH / 2.0, HEIGHT / 2.0), "Game over", RGB(0, 221, 0), RGB(221, 0, 0)));
+      auto so = std::make_unique<StringObject>(
+          StringObject(Point(WIDTH / 2.0, HEIGHT / 2.0), "Game over",
+                       RGB(0, 221, 0), RGB(221, 0, 0)));
       engine.addObject(std::move(so));
       engine.loop();
       int i = 0;
@@ -92,7 +95,7 @@ s:
     }
     if (i == 100) {
       int vx = distrib(gen);
-      int vy = ((double) distrib(gen) / (double) WIDTH) * HEIGHT;
+      int vy = ((double)distrib(gen) / (double)WIDTH) * HEIGHT;
       auto ppv = pp;
       ppv.setValue("🍏");
       ppv.setColor2(RGB(0, 0, 0));
