@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
     }
   }
   Engine engine(HEIGHT, WIDTH, verbose);
-  engine.setPosition(Point(10, 10));
+  // engine.setPosition(Point(10, 10));
   std::string value = " ";
   double px = 0.43;
   double py = 0.74;
