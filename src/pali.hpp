@@ -5,12 +5,13 @@
 #include <cstring>
 #include <iostream>
 #include <memory>
+#include <thread>
 #include <string>
 #include <vector>
 #include <sys/ioctl.h>
+#include <map>
 #include <unistd.h>
 #include <queue>
-#include <thread>
 
 void enableRawMode();
 void disableRawMode();
@@ -135,6 +136,7 @@ public:
   }
   virtual void updateVelocity() = 0;
   virtual std::vector<Pixel> getPixels() = 0;
+  virtual void update(uint64_t u) = 0;
 };
 
 class PixelObject : public EngineObject {
@@ -149,6 +151,8 @@ public:
     return std::vector<Pixel>{Pixel(this->p, this->pp)};
   }
   void updateVelocity() override {}
+  void update(uint64_t u) override {
+  }
 
 private:
   PixelProperties pp;
@@ -163,6 +167,7 @@ public:
     this->pp = pp;
   }
   void updateVelocity() override {}
+  void update(uint64_t u) override {}
 
 private:
   PixelProperties pp;
@@ -207,6 +212,7 @@ public:
     return v;
   }
   void updateVelocity() override {}
+  void update(uint64_t) override {}
 
 private:
   int height;
@@ -233,6 +239,7 @@ public:
     phase += 1;
     phase = phase % 80;
   }
+  void update(uint64_t u) override {}
 
 private:
   PixelProperties pp;
@@ -262,6 +269,8 @@ public:
     this->color1 = color1;
     this->color2 = color2;
   }
+
+  void update(uint64_t u) override {}
 
 private:
   std::string s;
@@ -315,6 +324,75 @@ class InputFieldObject : public EngineObject {
     return vals;
   }
   void updateVelocity() override {}
+  void update(uint64_t u) override {}
+};
+
+class FrameObject: public EngineObject {
+  public:
+  FrameObject() {}
+  FrameObject(Point p, int width, int height, RGB color2, bool visible) {
+    this->visible = visible;
+    this->p = p;
+    this->width = width;
+    this->height = height;
+    this->color2 = color2;
+  }
+  int id = 0;
+  bool visible;
+  int width;
+  int height;
+  RGB color2;
+  std::vector<std::unique_ptr<EngineObject>> objects;
+  void addObject(std::unique_ptr<EngineObject> eo) {
+    this->objects.push_back(std::move(eo));
+  }
+  void removeObject(uint64_t id) {
+    for (auto it = this->objects.begin(); it != this->objects.end(); it++) {
+      if ((*it)->id == id) {
+        this->objects.erase(it);
+        return;
+      }
+    }
+  }
+  std::vector<Pixel> getPixels() override {
+    std::vector<Pixel> v;
+    if (this->visible) {
+      for (auto &eo : this->objects) {
+        auto pixels = eo->getPixels();
+        for (auto &p : pixels) {
+          v.push_back(p);
+        }
+      }
+    }
+    return v;
+  }
+  void update(uint64_t u) override {
+    for (auto i = this->objects.end() - 1; i >= this->objects.begin();) {
+      // std::cout << "Object" << "\n";
+      float x = (*i)->p.x;
+      float y = (*i)->p.y;
+      // std::cout << "Position " + std::to_string(x) + " " + std::to_string(y)
+      // + "\n";
+      if (x < 0 || y < 0 || x >= this->width || y >= this->height) {
+        // std::cout << "Removing object" << std::endl;
+        ;
+        this->objects.erase(i);
+      }
+      i--;
+    }
+    for (auto &eo : this->objects) {
+      eo->update(u);
+    }
+    this->p.x += this->v.x * u / 1000000.0;
+    this->p.y += this->v.y * u / 1000000.0;
+  }
+  uint64_t addObject(std::unique_ptr<EngineObject> eo, uint64_t layer) {
+    uint64_t id = this->id;
+    this->id += 1;
+    eo->id = id;
+    this->objects.push_back(std::move(eo));
+    return id;
+  }
 };
 
 class Engine {
@@ -343,7 +421,7 @@ public:
   uint64_t p = 0; // previous position
   uint64_t pvg = 0;
 
-  std::vector<std::unique_ptr<EngineObject>> objects;
+  std::map<uint64_t, std::unique_ptr<EngineObject>> objects;
   uint64_t addObject(std::unique_ptr<EngineObject> eo);
   inline char getInput() {
     if (this->queue.empty()) {
@@ -375,7 +453,7 @@ public:
 
   void removeObject(uint64_t id) {
     for (auto it = this->objects.begin(); it != this->objects.end(); it++) {
-      if ((*it)->id == id) {
+      if (it->first == id) {
         this->objects.erase(it);
         return;
       }
@@ -383,27 +461,8 @@ public:
   }
   void emptyObjs() { this->objects.clear(); }
   void updateObjects() {
-    if (this->verbose) {
-      std::cout << "Updating objects\n";
-    }
-    for (auto i = this->objects.end() - 1; i >= this->objects.begin();) {
-      // std::cout << "Object" << "\n";
-      float x = (*i)->p.x;
-      float y = (*i)->p.y;
-      // std::cout << "Position " + std::to_string(x) + " " + std::to_string(y)
-      // + "\n";
-      if (x < 0 || y < 0 || x >= this->image.width || y >= this->image.height) {
-        // std::cout << "Removing object" << std::endl;
-        ;
-        this->objects.erase(i);
-      }
-      i--;
-    }
     for (auto &eo : this->objects) {
-      eo->updateVelocity();
-      eo->p.x += eo->v.x * this->u / 1000000.0;
-      eo->p.y += eo->v.y * this->u / 1000000.0;
-      ;
+      eo.second->update(this->u);
     }
   }
   void loadObjects() {
@@ -411,7 +470,7 @@ public:
       std::cout << "Loading objects\n";
     }
     for (auto &eo : this->objects) {
-      for (Pixel &p : eo->getPixels()) {
+      for (Pixel &p : eo.second->getPixels()) {
         if (p.p.x < 0 || p.p.x > this->image.width || p.p.y < 0 ||
             p.p.y >= this->image.height) {
           continue;
