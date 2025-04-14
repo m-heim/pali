@@ -1,4 +1,4 @@
-#include "pali.hpp"
+#include <pali.hpp>
 #include <cstdio>
 #include <iostream>
 #include <memory>
@@ -52,7 +52,7 @@ s:
     // std::cout << "Queue" << std::to_string(v.size()) << std::endl;
     // std::cout << std::to_string(x) << " " << std::to_string(y) << std::endl;
     engine.loop();
-    char vq = engine.getInput();
+    char vq = engine.getInput(true);
     if (vq == 'w') {
       if (dir != 2) {
         dir = 0;
