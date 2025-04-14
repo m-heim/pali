@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(pali VERSION 0.0.1 LANGUAGES CXX)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+add_compile_options(-g)
 add_subdirectory(examples)
 add_subdirectory(src)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
