@@ -1,4 +1,4 @@
-#include "pali.hpp"
+#include <pali.hpp>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -28,10 +28,7 @@ int main(int argc, char **argv) {
   engine.addObject(std::move(so2));
   auto so3 = std::make_unique<InputFieldObject>(InputFieldObject(
       Point(43, 43),
-      "Hello world2 example of a input fieldHello world2 example of a input "
-      "fieldHello world2 example of a input fieldHello world2 example of a "
-      "input fieldHello world2 example of a input fieldHello world2 example of "
-      "a input field",
+      "Hello world",
       24, 24, RGB(242, 242, 242), RGB(84, 84, 84), false));
   engine.addObject(std::move(so3));
   engine.setPosition(Point(24, 24));
