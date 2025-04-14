@@ -1,7 +1,7 @@
-#include <pali.hpp>
 #include <cstdio>
 #include <iostream>
 #include <memory>
+#include <pali.hpp>
 #include <queue>
 #include <random>
 #include <string>
