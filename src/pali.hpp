@@ -7,8 +7,8 @@
 #include <map>
 #include <memory>
 #include <queue>
-#include <string>
 #include <stack>
+#include <string>
 #include <sys/ioctl.h>
 #include <thread>
 #include <unistd.h>
@@ -137,9 +137,7 @@ public:
   uint64_t id;
   uint64_t getId() { return this->id; }
   Point v = Point(0, 0);
-  void setVelocity(Point v) {
-    this->v = v;
-  }
+  void setVelocity(Point v) { this->v = v; }
   virtual void updateVelocity(uint64_t u) = 0;
   void updatePosition(uint64_t u) {
     this->p.x += this->v.x * u / 1000000.0;
@@ -342,8 +340,9 @@ public:
           if (i * this->width + j < this->s.length()) {
             vs = std::string(1, this->s.at(i * this->width + j));
           }
-          vals.push_back(Pixel(Point(posx, posy),
-                              PixelProperties(vs, this->color1, this->color2)));
+          vals.push_back(
+              Pixel(Point(posx, posy),
+                    PixelProperties(vs, this->color1, this->color2)));
         }
       }
     }
@@ -434,8 +433,13 @@ public:
     for (int i = Screens::SCREEN; i <= Screens::MENU; i++) {
       this->addScreen(i);
     }
-    FrameObject *o = dynamic_cast<FrameObject *>(this->getObject(Screens::MENU));
-    o->addObject(std::make_unique<StringObject>(StringObject(Point(40, 20), "FPS " + std::to_string(1000000.0 / this->u) + " " + "/" + " " + std::to_string(this->fps), RGB(255, 255, 255), RGB(0, 0, 0))));
+    FrameObject *o =
+        dynamic_cast<FrameObject *>(this->getObject(Screens::MENU));
+    o->addObject(std::make_unique<StringObject>(
+        StringObject(Point(40, 20),
+                     "FPS " + std::to_string(1000000.0 / this->u) + " " + "/" +
+                         " " + std::to_string(this->fps),
+                     RGB(255, 255, 255), RGB(0, 0, 0))));
     this->pushScreen(Screens::SCREEN);
   }
   ~Engine() { this->j.join(); }
@@ -449,7 +453,9 @@ public:
   Point position = Point(0, 0); // position on screen
   uint64_t id = 0;
   uint64_t u = 0; // microseconds for frame
-  uint64_t p = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count(); // previous position
+  uint64_t p = std::chrono::duration_cast<std::chrono::microseconds>(
+                   std::chrono::high_resolution_clock::now().time_since_epoch())
+                   .count(); // previous position
   uint64_t pvg = 0;
 
   std::stack<uint64_t> s;
@@ -468,9 +474,7 @@ public:
     this->getObject(this->s.top())->setVisible(true);
   }
 
-  uint64_t getScreen() {
-    return this->s.top();
-  }
+  uint64_t getScreen() { return this->s.top(); }
 
   std::map<uint64_t, std::unique_ptr<EngineObject>> objects;
   uint64_t addObject(std::unique_ptr<EngineObject> eo);
@@ -485,7 +489,9 @@ public:
     return v;
   }
   void addScreen(uint64_t id) {
-    this->objects[id] = std::make_unique<FrameObject>(FrameObject(Point(0, 0), this->image.width, this->image.height, RGB(0, 0, 0), false));
+    this->objects[id] = std::make_unique<FrameObject>(
+        FrameObject(Point(0, 0), this->image.width, this->image.height,
+                    RGB(0, 0, 0), false));
   }
 
   void input() {
@@ -529,7 +535,7 @@ public:
       this->objects.erase(id);
     }
   }
-  
+
   void emptyObjs() { this->objects.clear(); }
   void updateObjects() {
     for (auto &eo : this->objects) {
