@@ -69,6 +69,7 @@ void Engine::loop() {
       StringObject(Point(this->image.width - 10, 0), std::to_string(valu),
                    RGB(255, 255, 255), RGB(0, 0, 0)));
   // uint siv = this->addObject(std::move(si));
+  this->input();
   this->image.clear();
   this->updateObjects();
   this->loadObjects();
@@ -82,7 +83,7 @@ void Engine::loop() {
       std::chrono::duration_cast<std::chrono::microseconds>(
           std::chrono::high_resolution_clock::now().time_since_epoch())
           .count();
-  int u = i1 - this->p;
+  int64_t u = i1 - this->p;
   if (u < 0) {
     u = 0;
   }

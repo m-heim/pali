@@ -8,10 +8,16 @@
 #include <memory>
 #include <queue>
 #include <string>
+#include <stack>
 #include <sys/ioctl.h>
 #include <thread>
 #include <unistd.h>
 #include <vector>
+
+enum Screens {
+  SCREEN = 100000,
+  MENU = SCREEN + 1,
+};
 
 void enableRawMode();
 void disableRawMode();
@@ -124,16 +130,14 @@ public:
     this->v = v;
   }
   ~EngineObject() {}
-  bool getExists() { return this->exists; }
-  void setExists(bool exists) { this->exists = exists; }
-  bool exists = true;
+  bool getVisible() { return this->visible; }
+  void setVisible(bool visible) { this->visible = visible; }
+  bool visible = true;
   Point p;
   uint64_t id;
   uint64_t getId() { return this->id; }
   Point v = Point(0, 0);
   void setVelocity(Point v) {
-    // std::cout << "Setting velocity of " + std::to_string(this->p.x) + " " +
-    // std::to_string(this->p.y) + " " + "\n";
     this->v = v;
   }
   virtual void updateVelocity(uint64_t u) = 0;
@@ -154,7 +158,11 @@ public:
   }
   ~PixelObject() {}
   std::vector<Pixel> getPixels() override {
-    return std::vector<Pixel>{Pixel(this->p, this->pp)};
+    std::vector<Pixel> v;
+    if (this->visible) {
+      v.push_back(Pixel(this->p, this->pp));
+    }
+    return v;
   }
   void updateVelocity(uint64_t u) override { this->updatePosition(u); }
   void update(uint64_t u) override { this->updateVelocity(u); }
@@ -179,13 +187,15 @@ private:
   float radius;
   std::vector<Pixel> getPixels() override {
     std::vector<Pixel> v;
-    int eru = powf(this->radius, 2);
-    for (int i = -radius; i <= this->radius; i++) {
-      int pi = powf(i, 2);
-      for (int j = -radius; j <= this->radius; j++) {
-        int p = pi + powf(j, 2);
-        if (p <= eru) {
-          v.push_back(Pixel(Point(this->p.x + i, this->p.y + j), this->pp));
+    if (this->visible) {
+      int eru = powf(this->radius, 2);
+      for (int i = -radius; i <= this->radius; i++) {
+        int pi = powf(i, 2);
+        for (int j = -radius; j <= this->radius; j++) {
+          int p = pi + powf(j, 2);
+          if (p <= eru) {
+            v.push_back(Pixel(Point(this->p.x + i, this->p.y + j), this->pp));
+          }
         }
       }
     }
@@ -206,11 +216,13 @@ public:
   }
   std::vector<Pixel> getPixels() override {
     std::vector<Pixel> v;
-    for (int i = 0; i < height; i++) {
-      for (int j = 0; j < width; j++) {
-        if (this->fill || i == 0 || i == (height - 1) || j == 0 ||
-            j == (width - 1)) {
-          v.push_back(Pixel(Point(this->p.x + j, this->p.y + i), this->pp));
+    if (this->visible) {
+      for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+          if (this->fill || i == 0 || i == (height - 1) || j == 0 ||
+              j == (width - 1)) {
+            v.push_back(Pixel(Point(this->p.x + j, this->p.y + i), this->pp));
+          }
         }
       }
     }
@@ -255,11 +267,13 @@ private:
   int phase;
   std::vector<Pixel> getPixels() override {
     std::vector<Pixel> v;
-    for (int i = -radius; i <= radius; i++) {
-      v.push_back(Pixel(Point(this->p.x, this->p.y + i), this->pp));
-      v.push_back(Pixel(Point(this->p.x + i, this->p.y), this->pp));
-      v.push_back(Pixel(Point(this->p.x + i, this->p.y + i), this->pp));
-      v.push_back(Pixel(Point(this->p.x + i, this->p.y - i), this->pp));
+    if (this->visible) {
+      for (int i = -radius; i <= radius; i++) {
+        v.push_back(Pixel(Point(this->p.x, this->p.y + i), this->pp));
+        v.push_back(Pixel(Point(this->p.x + i, this->p.y), this->pp));
+        v.push_back(Pixel(Point(this->p.x + i, this->p.y + i), this->pp));
+        v.push_back(Pixel(Point(this->p.x + i, this->p.y - i), this->pp));
+      }
     }
     return v;
   }
@@ -285,12 +299,14 @@ private:
   RGB color2;
   std::vector<Pixel> getPixels() override {
     std::vector<Pixel> vals;
-    int i = 0;
-    for (char v : this->s) {
-      vals.push_back(Pixel(
-          Point(this->p.x + i, this->p.y),
-          PixelProperties(std::string(1, v), this->color1, this->color2)));
-      i += 1;
+    if (this->visible) {
+      int i = 0;
+      for (char v : this->s) {
+        vals.push_back(Pixel(
+            Point(this->p.x + i, this->p.y),
+            PixelProperties(std::string(1, v), this->color1, this->color2)));
+        i += 1;
+      }
     }
     return vals;
   }
@@ -317,16 +333,18 @@ public:
   int width;
   std::vector<Pixel> getPixels() override {
     std::vector<Pixel> vals;
-    for (int i = 0; i < this->height; i += 1) {
-      for (int j = 0; j < this->width; j += 1) {
-        int posx = this->p.x + j;
-        int posy = this->p.y + this->height - i;
-        std::string vs = " ";
-        if (i * this->width + j < this->s.length()) {
-          vs = std::string(1, this->s.at(i * this->width + j));
+    if (this->visible) {
+      for (int i = 0; i < this->height; i += 1) {
+        for (int j = 0; j < this->width; j += 1) {
+          int posx = this->p.x + j;
+          int posy = this->p.y + this->height - i;
+          std::string vs = " ";
+          if (i * this->width + j < this->s.length()) {
+            vs = std::string(1, this->s.at(i * this->width + j));
+          }
+          vals.push_back(Pixel(Point(posx, posy),
+                              PixelProperties(vs, this->color1, this->color2)));
         }
-        vals.push_back(Pixel(Point(posx, posy),
-                             PixelProperties(vs, this->color1, this->color2)));
       }
     }
     return vals;
@@ -368,7 +386,10 @@ public:
       for (auto &eo : this->objects) {
         auto pixels = eo.second->getPixels();
         for (auto &p : pixels) {
-          v.push_back(p);
+          Pixel pp = p;
+          pp.p.x += this->p.x;
+          pp.p.y += this->p.y;
+          v.push_back(pp);
         }
       }
     }
@@ -408,8 +429,14 @@ public:
     this->image = Image(height, width);
     this->fps = fps;
     this->queue = std::queue<char>();
-    ;
     this->j = std::thread(i, &this->queue);
+
+    for (int i = Screens::SCREEN; i <= Screens::MENU; i++) {
+      this->addScreen(i);
+    }
+    FrameObject *o = dynamic_cast<FrameObject *>(this->getObject(Screens::MENU));
+    o->addObject(std::make_unique<StringObject>(StringObject(Point(40, 20), "FPS " + std::to_string(1000000.0 / this->u) + " " + "/" + " " + std::to_string(this->fps), RGB(255, 255, 255), RGB(0, 0, 0))));
+    this->pushScreen(Screens::SCREEN);
   }
   ~Engine() { this->j.join(); }
   Image image;
@@ -422,19 +449,63 @@ public:
   Point position = Point(0, 0); // position on screen
   uint64_t id = 0;
   uint64_t u = 0; // microseconds for frame
-  uint64_t p = 0; // previous position
+  uint64_t p = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count(); // previous position
   uint64_t pvg = 0;
+
+  std::stack<uint64_t> s;
+
+  void pushScreen(uint64_t id) {
+    if (!this->s.empty()) {
+      this->getObject(this->s.top())->setVisible(false);
+    }
+    this->getObject(id)->setVisible(true);
+    this->s.push(id);
+  }
+
+  void popScreen(uint64_t id) {
+    this->getObject(id)->setVisible(false);
+    this->s.pop();
+    this->getObject(this->s.top())->setVisible(true);
+  }
+
+  uint64_t getScreen() {
+    return this->s.top();
+  }
 
   std::map<uint64_t, std::unique_ptr<EngineObject>> objects;
   uint64_t addObject(std::unique_ptr<EngineObject> eo);
-  inline char getInput() {
+  inline char getInput(bool s) {
     if (this->queue.empty()) {
       return 0;
     }
     char v = this->queue.front();
-    this->queue.pop();
+    if (s) {
+      this->queue.pop();
+    }
     return v;
   }
+  void addScreen(uint64_t id) {
+    this->objects[id] = std::make_unique<FrameObject>(FrameObject(Point(0, 0), this->image.width, this->image.height, RGB(0, 0, 0), false));
+  }
+
+  void input() {
+    char v = this->getInput(true);
+    if (v == 'o') {
+      if (this->getScreen() == Screens::MENU) {
+        this->popScreen(Screens::MENU);
+      } else {
+        this->pushScreen(Screens::MENU);
+      }
+    }
+  }
+
+  EngineObject *getObject(uint64_t id) {
+    if (this->objects.find(id) != this->objects.end()) {
+      return this->objects[id].get();
+    }
+    throw std::runtime_error("Obj");
+  }
+
   void setPosition(Point p) { this->position = p; }
 
   void setRealPosition() {
@@ -458,6 +529,7 @@ public:
       this->objects.erase(id);
     }
   }
+  
   void emptyObjs() { this->objects.clear(); }
   void updateObjects() {
     for (auto &eo : this->objects) {
@@ -465,14 +537,9 @@ public:
     }
     auto it = this->objects.begin();
     while (it != this->objects.end()) {
-      // std::cout << "Object" << "\n";
       float x = it->second->p.x;
       float y = it->second->p.y;
-      // std::cout << "Position " + std::to_string(x) + " " + std::to_string(y)
-      // + "\n";
       if (x < 0 || y < 0 || x >= this->image.width || y >= this->image.height) {
-        // std::cout << "Removing object" << std::endl;
-        ;
         this->removeObject(it->first);
         it = this->objects.begin();
 
