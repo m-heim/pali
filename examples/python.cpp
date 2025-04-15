@@ -26,6 +26,7 @@ std::string getString(int v) {
 int main() {
 s:
   Engine engine(HEIGHT, WIDTH, false, 24);
+  auto screen = dynamic_cast<FrameObject *>(engine.getObject(Screens::SCREEN));
   std::queue<PixelObject> q;
   std::string value = "#";
   PixelProperties pp = PixelProperties(value, RGB(221, 0, 0), RGB(0, 0, 0));
@@ -41,7 +42,7 @@ s:
     pp.setValue(getString(dir));
     auto po = std::make_unique<PixelObject>(PixelObject(Point(x, y), pp));
     // po->setVelocity(Point(0, 1));
-    uint64_t vi = engine.addObject(std::move(po));
+    uint64_t vi = screen->addObject(std::move(po));
     v.push(vi);
     y += 1;
     s += 1;
@@ -52,7 +53,7 @@ s:
     // std::cout << "Queue" << std::to_string(v.size()) << std::endl;
     // std::cout << std::to_string(x) << " " << std::to_string(y) << std::endl;
     engine.loop();
-    char vq = engine.getInput(true);
+    char vq = engine.getInput(false);
     if (vq == 'w') {
       if (dir != 2) {
         dir = 0;
@@ -74,23 +75,23 @@ s:
     if (!v.empty()) {
       uint64_t vi = v.front();
       v.pop();
-      engine.removeObject(vi);
+      screen->removeObject(vi);
     }
     if (x > 0 && x < WIDTH && y > 0 && y < HEIGHT) {
       std::string eo = "  ";
       auto so = std::make_unique<StringObject>(
           StringObject(Point(x, y), eo, RGB(0, 0, 0), RGB(221, 0, 0)));
-      uint64_t vi = engine.addObject(std::move(so));
+      uint64_t vi = screen->addObject(std::move(so));
       v.push(vi);
     } else {
       engine.emptyObjs();
       auto so = std::make_unique<StringObject>(
           StringObject(Point(WIDTH / 2.0, HEIGHT / 2.0), "Game over",
                        RGB(0, 221, 0), RGB(221, 0, 0)));
-      engine.addObject(std::move(so));
+      screen->addObject(std::move(so));
       engine.loop();
       int i = 0;
-      while (engine.getInput() != 's') {
+      while (engine.getInput(true) != 's') {
       }
     }
     if (i == 100) {
@@ -100,7 +101,7 @@ s:
       ppv.setValue("🍏");
       ppv.setColor2(RGB(0, 0, 0));
       auto po = std::make_unique<PixelObject>(PixelObject(Point(vx, vy), ppv));
-      engine.addObject(std::move(po));
+      screen->addObject(std::move(po));
       i = 0;
     }
     if (dir == 0) {
