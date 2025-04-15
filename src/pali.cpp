@@ -70,6 +70,7 @@ void Engine::loop() {
                    RGB(255, 255, 255), RGB(0, 0, 0)));
   // uint siv = this->addObject(std::move(si));
   this->input();
+  this->updateMenu();
   this->image.clear();
   this->updateObjects();
   this->loadObjects();
