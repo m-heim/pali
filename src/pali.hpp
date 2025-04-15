@@ -290,6 +290,7 @@ public:
 
   void update(uint64_t u) override { this->updateVelocity(u); }
   void updateVelocity(uint64_t u) override { this->updatePosition(u); }
+  void setString(std::string s) {this->s = s;}
 
 private:
   std::string s;
@@ -363,7 +364,6 @@ public:
     this->color2 = color2;
   }
   int id = 0;
-  bool visible;
   int width;
   int height;
   RGB color2;
@@ -378,6 +378,13 @@ public:
     if (this->objects.find(id) != this->objects.end()) {
       this->objects.erase(id);
     }
+  }
+  EngineObject *getObject(uint64_t id) {
+    auto o = this->objects.find(id);
+    if (o != this->objects.end()) {
+      return o->second.get();
+    }
+    throw std::runtime_error("Obj");
   }
   std::vector<Pixel> getPixels() override {
     std::vector<Pixel> v;
@@ -435,11 +442,12 @@ public:
     }
     FrameObject *o =
         dynamic_cast<FrameObject *>(this->getObject(Screens::MENU));
-    o->addObject(std::make_unique<StringObject>(
+    std::unique_ptr<StringObject> obj = std::make_unique<StringObject>(
         StringObject(Point(40, 20),
-                     "FPS " + std::to_string(1000000.0 / this->u) + " " + "/" +
-                         " " + std::to_string(this->fps),
-                     RGB(255, 255, 255), RGB(0, 0, 0))));
+                     "FPS 0 / " + std::to_string(this->fps),
+                     RGB(255, 255, 255), RGB(0, 0, 0)));
+    uint64_t v = o->addObject(std::move(obj));
+    this->fpso = v;
     this->pushScreen(Screens::SCREEN);
   }
   ~Engine() { this->j.join(); }
@@ -448,6 +456,7 @@ public:
   int height_real;
   int width_real;
   double fps;                   // frames per second
+  uint64_t fpso;
   std::queue<char> queue;       // input queue
   std::thread j;                // input thread
   Point position = Point(0, 0); // position on screen
@@ -458,7 +467,16 @@ public:
                    .count(); // previous position
   uint64_t pvg = 0;
 
+  void setFpso() {
+    dynamic_cast<StringObject *>(dynamic_cast<FrameObject *>(this->getObject(Screens::MENU))->getObject(fpso))->setString("FPS " + std::to_string(1000000.0 / this->u) + " " + "/" +
+                         " " + std::to_string(this->fps));
+  }
+
   std::stack<uint64_t> s;
+
+  void updateMenu() {
+    this->setFpso();
+  }
 
   void pushScreen(uint64_t id) {
     if (!this->s.empty()) {
