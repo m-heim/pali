@@ -3,10 +3,9 @@
 #include <pali.hpp>
 #include <random>
 #include <string>
-#include <vector>
 
 int main() {
-  Engine engine(84, 84, false);
+  Engine engine(84, 84, false, 43.0);
   std::string value = "o";
   int i = 0;
   while (i < 1000) {
@@ -19,13 +18,16 @@ int main() {
     if (x == 0) {
       x = 1;
     }
-    int r = distrib(gen);
-    r += 30;
-    r /= 10;
+
     int y = distrib(gen);
     if (y == 0) {
       y = 1;
     }
+
+    int r = distrib(gen);
+    r += 30;
+    r /= 7;
+
     auto po =
         std::make_unique<SphereObject>(SphereObject(Point(42, 42), pp, r));
     po->setVelocity(Point(x, y));
@@ -33,7 +35,6 @@ int main() {
     engine.addObject(std::move(po));
     std::cout << "Looping\n";
     engine.loop();
-    usleep(10000);
     i++;
   }
   return 0;
