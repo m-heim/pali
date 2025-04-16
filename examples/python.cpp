@@ -1,14 +1,11 @@
 #include <cstdio>
-#include <iostream>
 #include <memory>
 #include <pali.hpp>
 #include <queue>
 #include <random>
 #include <string>
 #include <termios.h>
-#include <thread>
 #include <unistd.h>
-#include <vector>
 
 #define HEIGHT 43
 #define WIDTH 242
@@ -41,7 +38,6 @@ s:
   for (int i = 0; i < 10; i++) {
     pp.setValue(getString(dir));
     auto po = std::make_unique<PixelObject>(PixelObject(Point(x, y), pp));
-    // po->setVelocity(Point(0, 1));
     uint64_t vi = screen->addObject(std::move(po));
     v.push(vi);
     y += 1;
@@ -49,9 +45,6 @@ s:
   }
   int i = 0;
   while (1) {
-    // std::cout << "Looping\n";
-    // std::cout << "Queue" << std::to_string(v.size()) << std::endl;
-    // std::cout << std::to_string(x) << " " << std::to_string(y) << std::endl;
     engine.loop();
     char vq = engine.getInput(false);
     if (vq == 'w') {
