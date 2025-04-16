@@ -1,4 +1,3 @@
-#include <iostream>
 #include <memory>
 #include <pali.hpp>
 #include <string>
@@ -51,7 +50,6 @@ int main(int argc, char **argv) {
   while (1) {
     engine.loop();
     usleep(434);
-    // engine.emptyObjs();
     i += 1;
   }
   return 0;
