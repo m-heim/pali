@@ -1,6 +1,6 @@
-#include <pali.hpp>
 #include <iostream>
 #include <memory>
+#include <pali.hpp>
 #include <random>
 #include <string>
 #include <vector>
