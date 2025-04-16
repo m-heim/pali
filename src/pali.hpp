@@ -290,7 +290,7 @@ public:
 
   void update(uint64_t u) override { this->updateVelocity(u); }
   void updateVelocity(uint64_t u) override { this->updatePosition(u); }
-  void setString(std::string s) {this->s = s;}
+  void setString(std::string s) { this->s = s; }
 
 private:
   std::string s;
@@ -443,8 +443,7 @@ public:
     FrameObject *o =
         dynamic_cast<FrameObject *>(this->getObject(Screens::MENU));
     std::unique_ptr<StringObject> obj = std::make_unique<StringObject>(
-        StringObject(Point(40, 20),
-                     "FPS 0 / " + std::to_string(this->fps),
+        StringObject(Point(40, 20), "FPS 0 / " + std::to_string(this->fps),
                      RGB(255, 255, 255), RGB(0, 0, 0)));
     uint64_t v = o->addObject(std::move(obj));
     this->fpso = v;
@@ -455,7 +454,7 @@ public:
   bool verbose; // be verbose
   int height_real;
   int width_real;
-  double fps;                   // frames per second
+  double fps; // frames per second
   uint64_t fpso;
   std::queue<char> queue;       // input queue
   std::thread j;                // input thread
@@ -468,15 +467,16 @@ public:
   uint64_t pvg = 0;
 
   void setFpso() {
-    dynamic_cast<StringObject *>(dynamic_cast<FrameObject *>(this->getObject(Screens::MENU))->getObject(fpso))->setString("FPS " + std::to_string(1000000.0 / this->u) + " " + "/" +
-                         " " + std::to_string(this->fps));
+    dynamic_cast<StringObject *>(
+        dynamic_cast<FrameObject *>(this->getObject(Screens::MENU))
+            ->getObject(fpso))
+        ->setString("FPS " + std::to_string(1000000.0 / this->u) + " " + "/" +
+                    " " + std::to_string(this->fps));
   }
 
   std::stack<uint64_t> s;
 
-  void updateMenu() {
-    this->setFpso();
-  }
+  void updateMenu() { this->setFpso(); }
 
   void pushScreen(uint64_t id) {
     if (!this->s.empty()) {
