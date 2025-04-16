@@ -1,6 +1,6 @@
-#include <pali.hpp>
 #include <iostream>
 #include <memory>
+#include <pali.hpp>
 #include <string>
 #include <unistd.h>
 
@@ -26,10 +26,9 @@ int main(int argc, char **argv) {
   auto so2 = std::make_unique<RectangleObject>(
       RectangleObject(Point(9, 9), pp, 3, 13, false));
   engine.addObject(std::move(so2));
-  auto so3 = std::make_unique<InputFieldObject>(InputFieldObject(
-      Point(43, 43),
-      "Hello world",
-      24, 24, RGB(242, 242, 242), RGB(84, 84, 84), false));
+  auto so3 = std::make_unique<InputFieldObject>(
+      InputFieldObject(Point(43, 43), "Hello world", 24, 24, RGB(242, 242, 242),
+                       RGB(84, 84, 84), false));
   engine.addObject(std::move(so3));
   engine.setPosition(Point(24, 24));
   int i = 0;

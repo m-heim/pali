@@ -20,7 +20,8 @@ int main(int argc, char **argv) {
   Engine engine(HEIGHT, WIDTH, verbose, 43.0);
   std::string value = " ";
   PixelProperties pp = PixelProperties(value, RGB(0, 0, 0), RGB(0, 255, 0));
-  FrameObject *frame = dynamic_cast<FrameObject *>(engine.getObject(Screens::SCREEN));
+  FrameObject *frame =
+      dynamic_cast<FrameObject *>(engine.getObject(Screens::SCREEN));
   auto so1 = std::make_unique<StringObject>(StringObject(
       Point(10, 10), "Hello world", RGB(0, 0, 0), RGB(255, 255, 255)));
   auto so2 = std::make_unique<RectangleObject>(
