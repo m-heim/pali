@@ -31,10 +31,7 @@ int main(int argc, char **argv) {
   engine.addObject(std::move(so2));
   auto so3 = std::make_unique<InputFieldObject>(InputFieldObject(
       Point(43, 43),
-      "Hello world2 example of a input fieldHello world2 example of a input "
-      "fieldHello world2 example of a input fieldHello world2 example of a "
-      "input fieldHello world2 example of a input fieldHello world2 example of "
-      "a input field",
+      "Hello world2 example of a input field\n32141232142134213413442213214",
       24, 24, RGB(242, 242, 242), RGB(84, 84, 84), false));
 
   engine.addObject(std::move(so3));
