@@ -1,0 +1,6 @@
+<pali height=48 width=48>
+<frame id="frame">
+    <string x=24 y=24>Hello world!</string>
+    <input id="in" x=18 y=23 height=1 width=12></input>
+</frame>
+</pali>
