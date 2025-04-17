@@ -77,7 +77,7 @@ s:
       uint64_t vi = screen->addObject(std::move(so));
       v.push(vi);
     } else {
-      engine.emptyObjs();
+      //engine.emptyObjs();
       auto so = std::make_unique<StringObject>(
           StringObject(Point(WIDTH / 2.0, HEIGHT / 2.0), "Game over",
                        RGB(0, 221, 0), RGB(221, 0, 0)));
