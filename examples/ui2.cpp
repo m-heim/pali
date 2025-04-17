@@ -17,9 +17,12 @@ int main(int argc, char **argv) {
       }
     }
   }
+
   Engine engine(HEIGHT, WIDTH, verbose, 141.0);
+
   std::string value = " ";
   PixelProperties pp = PixelProperties(value, RGB(0, 0, 0), RGB(0, 255, 0));
+
   auto so1 = std::make_unique<StringObject>(StringObject(
       Point(10, 10), "Hello world", RGB(0, 0, 0), RGB(255, 255, 255)));
   engine.addObject(std::move(so1));
@@ -29,13 +32,14 @@ int main(int argc, char **argv) {
   auto so3 = std::make_unique<InputFieldObject>(
       InputFieldObject(Point(43, 43), "Hello world", 24, 24, RGB(242, 242, 242),
                        RGB(84, 84, 84), false));
+
   engine.addObject(std::move(so3));
   engine.setPosition(Point(24, 24));
+
   int i = 0;
   while (1) {
     engine.loop();
     usleep(434);
-    // engine.emptyObjs();
     i += 1;
   }
   return 0;
