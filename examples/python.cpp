@@ -21,8 +21,8 @@ std::string getString(int v) {
 }
 
 int main() {
-s:
   Engine engine(HEIGHT, WIDTH, false, 24);
+
   auto screen = dynamic_cast<FrameObject *>(engine.getObject(Screens::SCREEN));
   std::queue<PixelObject> q;
   std::string value = "#";
@@ -35,6 +35,7 @@ s:
   int dir = 0;
   std::size_t s = 0;
   std::queue<uint64_t> v;
+
   for (int i = 0; i < 10; i++) {
     pp.setValue(getString(dir));
     auto po = std::make_unique<PixelObject>(PixelObject(Point(x, y), pp));
@@ -43,6 +44,7 @@ s:
     y += 1;
     s += 1;
   }
+
   int i = 0;
   while (1) {
     engine.loop();
@@ -65,6 +67,7 @@ s:
       }
     } else {
     }
+
     if (!v.empty()) {
       uint64_t vi = v.front();
       v.pop();
@@ -87,6 +90,7 @@ s:
       while (engine.getInput(true) != 's') {
       }
     }
+
     if (i == 100) {
       int vx = distrib(gen);
       int vy = ((double)distrib(gen) / (double)WIDTH) * HEIGHT;
@@ -97,6 +101,7 @@ s:
       screen->addObject(std::move(po));
       i = 0;
     }
+
     if (dir == 0) {
       y += 1;
     }
