@@ -1,7 +1,7 @@
 #ifndef _COLOR_HPP_
 #define _COLOR_HPP_
-#include <stdlib.h>
 #include <cstring>
+#include <stdlib.h>
 #include <unistd.h>
 
 #define GREEN RGB(0, 255, 0)

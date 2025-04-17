@@ -1,9 +1,9 @@
 #ifndef PALI_HPP
 #define PALI_HPP
+#include "color.hpp"
 #include <chrono>
 #include <cmath>
 #include <cstring>
-#include "color.hpp"
 #include <iostream>
 #include <map>
 #include <memory>

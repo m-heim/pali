@@ -142,9 +142,8 @@ char Engine::getInput(bool s) {
 }
 
 void Engine::addScreen(uint64_t id) {
-  this->objects[id] = std::make_unique<FrameObject>(
-      FrameObject(Point(0, 0), this->image.width, this->image.height,
-                  RGB(0, 0, 0), false));
+  this->objects[id] = std::make_unique<FrameObject>(FrameObject(
+      Point(0, 0), this->image.width, this->image.height, RGB(0, 0, 0), false));
 }
 
 void Engine::input() {
@@ -194,18 +193,19 @@ void Engine::updateObjects() {
   for (auto &eo : this->objects) {
     eo.second->update(this->u);
   }
-  //auto it = this->objects.begin();
-  //while (it != this->objects.end()) {
-  //  float x = it->second->p.x;
-  //  float y = it->second->p.y;
-  //  if (x < 0 || y < 0 || x >= this->image.width || y >= this->image.height) {
-  //    this->removeObject(it->first);
-  //    it = this->objects.begin();
+  // auto it = this->objects.begin();
+  // while (it != this->objects.end()) {
+  //   float x = it->second->p.x;
+  //   float y = it->second->p.y;
+  //   if (x < 0 || y < 0 || x >= this->image.width || y >= this->image.height)
+  //   {
+  //     this->removeObject(it->first);
+  //     it = this->objects.begin();
   //
-  //} else {
-  //    it++;
-  //}
-  //}
+  // } else {
+  //     it++;
+  // }
+  // }
 }
 void Engine::loadObjects() {
   for (auto &eo : this->objects) {
@@ -226,9 +226,8 @@ uint64_t FrameObject::addObject(std::unique_ptr<EngineObject> eo) {
   idgv += 1;
   return i_;
 }
-void FrameObject::removeObject(uint64_t id) {
-  this->objects.erase(id);
-}
+
+void FrameObject::removeObject(uint64_t id) { this->objects.erase(id); }
 EngineObject *FrameObject::getObject(uint64_t id) {
   auto eo = this->objects.find(id);
   if (eo != this->objects.end()) {
@@ -236,6 +235,7 @@ EngineObject *FrameObject::getObject(uint64_t id) {
   }
   throw std::runtime_error("Obj");
 }
+
 std::vector<Pixel> FrameObject::getPixels() {
   std::vector<Pixel> v;
   if (this->visible) {
@@ -255,23 +255,25 @@ void FrameObject::update(uint64_t u) {
   for (auto &eo : this->objects) {
     eo.second->update(u);
   }
+
   this->updateVelocity(u);
   auto it = this->objects.begin();
-  //while (it != this->objects.end()) {
-    // std::cout << "Object" << "\n";
-    //float x = it->second->p.x;
-    //float y = it->second->p.y;
-    // std::cout << "Position " + std::to_string(x) + " " + std::to_string(y)
-    // + "\n";
-    //if (x < 0 || y < 0 || x >= this->width || y >= this->height) {
-      // std::cout << "Removing object" << std::endl;
-    //  ;
-    //  this->removeObject(it->first);
-    //  it = this->objects.begin();
-    //
-    //} else {
-    //  it++;
-    //}
+  // while (it != this->objects.end()) {
+  //  std::cout << "Object" << "\n";
+  // float x = it->second->p.x;
+  // float y = it->second->p.y;
+  //  std::cout << "Position " + std::to_string(x) + " " + std::to_string(y)
+  //  + "\n";
+  // if (x < 0 || y < 0 || x >= this->width || y >= this->height) {
+  //  std::cout << "Removing object" << std::endl;
+  //  ;
+  //  this->removeObject(it->first);
+  //  it = this->objects.begin();
+  //
+  //} else {
+  //  it++;
+  //}
   //}
 }
-void FrameObject::updateVelocity(uint64_t u){ this->updatePosition(u); }
+
+void FrameObject::updateVelocity(uint64_t u) { this->updatePosition(u); }
