@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstring>
+#include "color.hpp"
 #include <iostream>
 #include <map>
 #include <memory>
@@ -34,25 +35,6 @@ public:
   }
   float x;
   float y;
-};
-
-class RGB {
-public:
-  RGB() {}
-  RGB(int red, int green, int blue) {
-    this->green = green;
-    this->blue = blue;
-    this->red = red;
-  }
-  inline bool operator==(const RGB &rhs) const {
-    return std::memcmp(this, &rhs, sizeof(RGB)) == 0;
-  }
-  inline bool operator!=(const RGB &rhs) const {
-    return std::memcmp(this, &rhs, sizeof(RGB)) != 0;
-  }
-  int green;
-  int red;
-  int blue;
 };
 
 class PixelProperties {
@@ -368,63 +350,12 @@ public:
   int height;
   RGB color2;
   std::map<uint64_t, std::unique_ptr<EngineObject>> objects;
-  uint64_t addObject(std::unique_ptr<EngineObject> eo) {
-    uint64_t i_ = idgv;
-    this->objects[i_] = std::move(eo);
-    idgv += 1;
-    return i_;
-  }
-  void removeObject(uint64_t id) {
-    if (this->objects.find(id) != this->objects.end()) {
-      this->objects.erase(id);
-    }
-  }
-  EngineObject *getObject(uint64_t id) {
-    auto o = this->objects.find(id);
-    if (o != this->objects.end()) {
-      return o->second.get();
-    }
-    throw std::runtime_error("Obj");
-  }
-  std::vector<Pixel> getPixels() override {
-    std::vector<Pixel> v;
-    if (this->visible) {
-      for (auto &eo : this->objects) {
-        auto pixels = eo.second->getPixels();
-        for (auto &p : pixels) {
-          Pixel pp = p;
-          pp.p.x += this->p.x;
-          pp.p.y += this->p.y;
-          v.push_back(pp);
-        }
-      }
-    }
-    return v;
-  }
-  void update(uint64_t u) override {
-    for (auto &eo : this->objects) {
-      eo.second->update(u);
-    }
-    this->updateVelocity(u);
-    auto it = this->objects.begin();
-    while (it != this->objects.end()) {
-      // std::cout << "Object" << "\n";
-      float x = it->second->p.x;
-      float y = it->second->p.y;
-      // std::cout << "Position " + std::to_string(x) + " " + std::to_string(y)
-      // + "\n";
-      if (x < 0 || y < 0 || x >= this->width || y >= this->height) {
-        // std::cout << "Removing object" << std::endl;
-        ;
-        this->removeObject(it->first);
-        it = this->objects.begin();
-
-      } else {
-        it++;
-      }
-    }
-  }
-  void updateVelocity(uint64_t u) override { this->updatePosition(u); }
+  uint64_t addObject(std::unique_ptr<EngineObject> eo);
+  void removeObject(uint64_t id);
+  EngineObject *getObject(uint64_t id);
+  std::vector<Pixel> getPixels() override;
+  void update(uint64_t u) override;
+  void updateVelocity(uint64_t u) override;
 };
 
 class Engine {
@@ -466,123 +397,27 @@ public:
                    .count(); // previous position
   uint64_t pvg = 0;
 
-  void setFpso() {
-    dynamic_cast<StringObject *>(
-        dynamic_cast<FrameObject *>(this->getObject(Screens::MENU))
-            ->getObject(fpso))
-        ->setString("FPS " + std::to_string(1000000.0 / this->u) + " " + "/" +
-                    " " + std::to_string(this->fps));
-  }
-
+  std::map<uint64_t, std::unique_ptr<EngineObject>> objects;
   std::stack<uint64_t> s;
 
-  void updateMenu() { this->setFpso(); }
-
-  void pushScreen(uint64_t id) {
-    if (!this->s.empty()) {
-      this->getObject(this->s.top())->setVisible(false);
-    }
-    this->getObject(id)->setVisible(true);
-    this->s.push(id);
-  }
-
-  void popScreen(uint64_t id) {
-    this->getObject(id)->setVisible(false);
-    this->s.pop();
-    this->getObject(this->s.top())->setVisible(true);
-  }
-
-  uint64_t getScreen() { return this->s.top(); }
-
-  std::map<uint64_t, std::unique_ptr<EngineObject>> objects;
+  void setFpso();
+  void updateMenu();
+  void pushScreen(uint64_t id);
+  void popScreen(uint64_t id);
+  uint64_t getScreen();
   uint64_t addObject(std::unique_ptr<EngineObject> eo);
-  inline char getInput(bool s) {
-    if (this->queue.empty()) {
-      return 0;
-    }
-    char v = this->queue.front();
-    if (s) {
-      this->queue.pop();
-    }
-    return v;
-  }
-  void addScreen(uint64_t id) {
-    this->objects[id] = std::make_unique<FrameObject>(
-        FrameObject(Point(0, 0), this->image.width, this->image.height,
-                    RGB(0, 0, 0), false));
-  }
-
-  void input() {
-    char v = this->getInput(true);
-    if (v == 'o') {
-      if (this->getScreen() == Screens::MENU) {
-        this->popScreen(Screens::MENU);
-      } else {
-        this->pushScreen(Screens::MENU);
-      }
-    }
-  }
-
-  EngineObject *getObject(uint64_t id) {
-    if (this->objects.find(id) != this->objects.end()) {
-      return this->objects[id].get();
-    }
-    throw std::runtime_error("Obj");
-  }
-
-  void setPosition(Point p) { this->position = p; }
-
-  void setRealPosition() {
-    struct winsize w;
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-
-    this->height_real = w.ws_row;
-    this->width_real = w.ws_col;
-  }
-  void screenClear() { std::cout << "\u001b[2J" << std::endl; }
-
-  Point getRealPosition() {
-    Point p;
-    p.x = this->position.x;
-    p.y = this->height_real - this->position.y;
-    return p;
-  }
-
-  void removeObject(uint64_t id) {
-    if (this->objects.find(id) != this->objects.end()) {
-      this->objects.erase(id);
-    }
-  }
-
-  void emptyObjs() { this->objects.clear(); }
-  void updateObjects() {
-    for (auto &eo : this->objects) {
-      eo.second->update(this->u);
-    }
-    auto it = this->objects.begin();
-    while (it != this->objects.end()) {
-      float x = it->second->p.x;
-      float y = it->second->p.y;
-      if (x < 0 || y < 0 || x >= this->image.width || y >= this->image.height) {
-        this->removeObject(it->first);
-        it = this->objects.begin();
-
-      } else {
-        it++;
-      }
-    }
-  }
-  void loadObjects() {
-    for (auto &eo : this->objects) {
-      for (Pixel &p : eo.second->getPixels()) {
-        if (p.p.x < 0 || p.p.x > this->image.width || p.p.y < 0 ||
-            p.p.y >= this->image.height) {
-          continue;
-        }
-        this->image.setPixel(p.pp, p.p);
-      }
-    }
-  }
+  char getInput(bool s);
+  void addScreen(uint64_t id);
+  void input();
+  EngineObject *getObject(uint64_t id);
+  void setPosition(Point p);
+  void setRealPosition();
+  void screenClear();
+  Point getRealPosition();
+  void removeObject(uint64_t id);
+  void emptyObjs();
+  void updateObjects();
+  void loadObjects();
   void loop();
 };
 

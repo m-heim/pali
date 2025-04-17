@@ -103,3 +103,175 @@ uint64_t Engine::addObject(std::unique_ptr<EngineObject> eo) {
   idgv += 1;
   return i_;
 }
+
+void Engine::setFpso() {
+  dynamic_cast<StringObject *>(
+      dynamic_cast<FrameObject *>(this->getObject(Screens::MENU))
+          ->getObject(fpso))
+      ->setString("FPS " + std::to_string(1000000.0 / this->u) + " " + "/" +
+                  " " + std::to_string(this->fps));
+}
+
+void Engine::updateMenu() { this->setFpso(); }
+
+void Engine::pushScreen(uint64_t id) {
+  if (!this->s.empty()) {
+    this->getObject(this->s.top())->setVisible(false);
+  }
+  this->getObject(id)->setVisible(true);
+  this->s.push(id);
+}
+
+void Engine::popScreen(uint64_t id) {
+  this->getObject(id)->setVisible(false);
+  this->s.pop();
+  this->getObject(this->s.top())->setVisible(true);
+}
+
+uint64_t Engine::getScreen() { return this->s.top(); }
+
+char Engine::getInput(bool s) {
+  if (this->queue.empty()) {
+    return 0;
+  }
+  char v = this->queue.front();
+  if (s) {
+    this->queue.pop();
+  }
+  return v;
+}
+
+void Engine::addScreen(uint64_t id) {
+  this->objects[id] = std::make_unique<FrameObject>(
+      FrameObject(Point(0, 0), this->image.width, this->image.height,
+                  RGB(0, 0, 0), false));
+}
+
+void Engine::input() {
+  char v = this->getInput(true);
+  if (v == 'o') {
+    if (this->getScreen() == Screens::MENU) {
+      this->popScreen(Screens::MENU);
+    } else {
+      this->pushScreen(Screens::MENU);
+    }
+  }
+}
+
+EngineObject *Engine::getObject(uint64_t id) {
+  if (this->objects.find(id) != this->objects.end()) {
+    return this->objects[id].get();
+  }
+  return nullptr;
+}
+
+void Engine::setPosition(Point p) { this->position = p; }
+
+void Engine::setRealPosition() {
+  struct winsize w;
+  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+
+  this->height_real = w.ws_row;
+  this->width_real = w.ws_col;
+}
+void Engine::screenClear() { std::cout << "\u001b[2J" << std::endl; }
+
+Point Engine::getRealPosition() {
+  Point p;
+  p.x = this->position.x;
+  p.y = this->height_real - this->position.y;
+  return p;
+}
+
+void Engine::removeObject(uint64_t id) {
+  if (this->objects.find(id) != this->objects.end()) {
+    this->objects.erase(id);
+  }
+}
+
+void Engine::emptyObjs() { this->objects.clear(); }
+void Engine::updateObjects() {
+  for (auto &eo : this->objects) {
+    eo.second->update(this->u);
+  }
+  //auto it = this->objects.begin();
+  //while (it != this->objects.end()) {
+  //  float x = it->second->p.x;
+  //  float y = it->second->p.y;
+  //  if (x < 0 || y < 0 || x >= this->image.width || y >= this->image.height) {
+  //    this->removeObject(it->first);
+  //    it = this->objects.begin();
+  //
+  //} else {
+  //    it++;
+  //}
+  //}
+}
+void Engine::loadObjects() {
+  for (auto &eo : this->objects) {
+    for (Pixel &p : eo.second->getPixels()) {
+      if (p.p.x < 0 || p.p.x > this->image.width || p.p.y < 0 ||
+          p.p.y >= this->image.height) {
+        continue;
+      }
+      this->image.setPixel(p.pp, p.p);
+    }
+  }
+}
+void loop();
+
+uint64_t FrameObject::addObject(std::unique_ptr<EngineObject> eo) {
+  uint64_t i_ = idgv;
+  this->objects[i_] = std::move(eo);
+  idgv += 1;
+  return i_;
+}
+void FrameObject::removeObject(uint64_t id) {
+  this->objects.erase(id);
+}
+EngineObject *FrameObject::getObject(uint64_t id) {
+  auto eo = this->objects.find(id);
+  if (eo != this->objects.end()) {
+    return eo->second.get();
+  }
+  throw std::runtime_error("Obj");
+}
+std::vector<Pixel> FrameObject::getPixels() {
+  std::vector<Pixel> v;
+  if (this->visible) {
+    for (auto &eo : this->objects) {
+      auto pixels = eo.second->getPixels();
+      for (auto &p : pixels) {
+        Pixel pp = p;
+        pp.p.x += this->p.x;
+        pp.p.y += this->p.y;
+        v.push_back(pp);
+      }
+    }
+  }
+  return v;
+}
+void FrameObject::update(uint64_t u) {
+  for (auto &eo : this->objects) {
+    eo.second->update(u);
+  }
+  this->updateVelocity(u);
+  auto it = this->objects.begin();
+  //while (it != this->objects.end()) {
+    // std::cout << "Object" << "\n";
+    //float x = it->second->p.x;
+    //float y = it->second->p.y;
+    // std::cout << "Position " + std::to_string(x) + " " + std::to_string(y)
+    // + "\n";
+    //if (x < 0 || y < 0 || x >= this->width || y >= this->height) {
+      // std::cout << "Removing object" << std::endl;
+    //  ;
+    //  this->removeObject(it->first);
+    //  it = this->objects.begin();
+    //
+    //} else {
+    //  it++;
+    //}
+  //}
+}
+void FrameObject::updateVelocity(uint64_t u){ this->updatePosition(u); }
