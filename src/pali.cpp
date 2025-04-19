@@ -6,6 +6,7 @@
 #include <termios.h>
 #include <unistd.h>
 
+
 void enableRawMode() {
   struct termios t;
   tcgetattr(STDIN_FILENO, &t);          // Get current terminal attributes
