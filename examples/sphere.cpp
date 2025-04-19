@@ -4,6 +4,9 @@
 #include <random>
 #include <string>
 
+#define HEIGHT 84
+#define WIDTH 84
+
 int main() {
   Engine engine(84, 84, false, 43.0);
   std::string value = "o";
