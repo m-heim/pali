@@ -10,6 +10,7 @@
 #define HEIGHT 43
 #define WIDTH 242
 
+
 std::string getString(int v) {
   std::string s = "";
   if (v % 2 == 1) {

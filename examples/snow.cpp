@@ -6,6 +6,7 @@
 #define HEIGHT 43
 #define WIDTH 242
 
+
 int main(int argc, char **argv) {
   bool verbose = false;
   if (argc > 1) {
